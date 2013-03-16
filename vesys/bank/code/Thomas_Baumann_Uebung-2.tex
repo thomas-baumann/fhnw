@@ -1,0 +1,163 @@
+\documentclass[10pt]{article}
+
+%Math
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{ulem}
+%\usepackage{stmaryrd} %f\UTF{00FC}r Blitz!
+
+% PageStyle
+\usepackage[ngerman]{babel} % deutsche Silbentrennung
+\usepackage[utf8]{inputenc}
+\usepackage{fancyhdr, graphicx}
+\usepackage[scaled=0.92]{helvet}
+\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage[a4paper,top=2cm]{geometry}
+\setlength{\textwidth}{17cm}
+\setlength{\oddsidemargin}{-0.5cm}
+
+
+% Shortcommands
+\newcommand{\Bold}[1]{\textbf{#1}} %Boldface
+\newcommand{\Kursiv}[1]{\textit{#1}} %Italic
+\newcommand{\T}[1]{\text{#1}} %Textmode
+\newcommand{\Nicht}[1]{\T{\sout{$ #1 $}}} %Streicht Shit durch
+
+%Arrows
+\newcommand{\lra}{\leftrightarrow} 
+\newcommand{\ra}{\rightarrow}
+\newcommand{\la}{\leftarrow}
+\newcommand{\lral}{\longleftrightarrow}
+\newcommand{\ral}{\longrightarrow}
+\newcommand{\lal}{\longleftarrow}
+\newcommand{\Lra}{\Leftrightarrow}
+\newcommand{\Ra}{\Rightarrow}
+\newcommand{\La}{\Leftarrow}
+\newcommand{\Lral}{\Longleftrightarrow}
+\newcommand{\Ral}{\Longrightarrow}
+\newcommand{\Lal}{\Longleftarrow}
+
+% Code listenings
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{caption}
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white}
+\lstdefinestyle{JavaStyle}{
+ language=Java,
+ basicstyle=\footnotesize\ttfamily, % Standardschrift
+ numbers=left,               % Ort der Zeilennummern
+ numberstyle=\tiny,          % Stil der Zeilennummern
+ stepnumber=1,              % Abstand zwischen den Zeilennummern
+ numbersep=5pt,              % Abstand der Nummern zum Text
+ tabsize=2,                  % Groesse von Tabs
+ extendedchars=true,         %
+ breaklines=true,            % Zeilen werden Umgebrochen
+ frame=b,         
+ %commentstyle=\itshape\color{LightLime}, Was isch das? O_o
+ %keywordstyle=\bfseries\color{DarkPurple}, und das O_o
+ basicstyle=\footnotesize\ttfamily,
+ stringstyle=\color[RGB]{42,0,255}\ttfamily, % Farbe der String
+ keywordstyle=\color[RGB]{127,0,85}\ttfamily, % Farbe der Keywords
+ commentstyle=\color[RGB]{63,127,95}\ttfamily, % Farbe des Kommentars
+ showspaces=false,           % Leerzeichen anzeigen ?
+ showtabs=false,             % Tabs anzeigen ?
+ xleftmargin=17pt,
+ framexleftmargin=17pt,
+ framexrightmargin=5pt,
+ framexbottommargin=4pt,
+ showstringspaces=false      % Leerzeichen in Strings anzeigen ?
+}
+\lstdefinelanguage{XMLStyle}{
+  basicstyle=\footnotesize\ttfamily,
+  morestring=[b]",
+  morestring=[s]{>}{<},
+  morecomment=[s]{<?}{?>},
+  stringstyle=\color{black},
+  identifierstyle=\color[rgb]{0.0,0.0,0.6},
+  keywordstyle=\color[rgb]{0.0,0.6,0.6},
+  commentstyle=\color[rgb]{0.4,0.4,0.4}\upshape,
+  morekeywords={xmlns,version,type}, % list your attributes here
+  showstringspaces=false
+}
+
+%Config
+\renewcommand{\headrulewidth}{0pt}
+\setlength{\headheight}{15.2pt}
+\let\stdsection\section{}
+\renewcommand{\section}{\newpage\stdsection}
+\usepackage{dirtree}
+
+%Metadata
+\fancyfoot[C]{}
+\title{
+	\vspace{5cm}
+	Verteilte Systeme FS 13\\
+	%\vspace{1cm}
+	Übung 2
+}
+\author{Thomas Baumann}
+\date{15. März 2013}
+
+
+% hier beginnt das Dokument
+\begin{document}
+
+% Titelbild
+\maketitle
+\thispagestyle{fancy}
+
+\newpage
+
+% Inhaltsverzeichnis
+\pagenumbering{Roman}
+\tableofcontents	  	
+
+
+\newpage
+\setcounter{page}{1}
+\pagenumbering{arabic}
+
+% Inhalt Start
+\section{Beschreibung}
+Im Vergleich zur ersten Übung habe ich nur noch ein Antwort Objekt für Rückgabewerte und für die vier Exception jeweils ein Antwort Objekt.
+
+\section{Server}
+\lstinputlisting[language=java,caption=Server Servlet,style=JavaStyle]{../src/bank/servlet/ServerServlet.java}
+\lstinputlisting[language=XMLStyle,caption=Servlet Konfiguration,style=XMLStyle]{../res/web.xml}
+
+\section{Client}
+\lstinputlisting[language=java,caption=Abstract Client Driver ,style=JavaStyle]{../src/bank/communication/AbstractClientDriver.java}
+\lstinputlisting[language=java,caption=Servlet Client Driver,style=JavaStyle]{../src/bank/servlet/ClientDriver.java}
+
+\section{Kommunikation Objekte}
+\subsection{Anfragen}
+\lstinputlisting[language=java,caption=Interface für Request Objekte,style=JavaStyle]{../src/bank/communication/request/IRequest.java}
+\lstinputlisting[language=java,caption=Anfrage Objekt um Konto zu eröffnen,style=JavaStyle]{../src/bank/communication/request/CreateAccountRequest.java}
+\lstinputlisting[language=java,caption=Anfrage Objekt um Konto zu schliessen,style=JavaStyle]{../src/bank/communication/request/CloseAccountRequest.java}
+\lstinputlisting[language=java,caption=Anfrage Objekt um Konto abzufragen,style=JavaStyle]{../src/bank/communication/request/GetAccountRequest.java}
+\lstinputlisting[language=java,caption=Anfrage Objekt um Kontonummer abzufragen,style=JavaStyle]{../src/bank/communication/request/GetAccountNumbersRequest.java}
+\lstinputlisting[language=java,caption=Anfrage Objekt um Geld zu transferieren,style=JavaStyle]{../src/bank/communication/request/TransferRequest.java}
+\lstinputlisting[language=java,caption=Anfrage Objekt um Kontobesitzer abzufragen,style=JavaStyle]{../src/bank/communication/request/GetOwnerRequest.java}
+\lstinputlisting[language=java,caption=Anfrage Objekt um Kontostand abzufragen,style=JavaStyle]{../src/bank/communication/request/GetBalanceRequest.java}
+\lstinputlisting[language=java,caption=Anfrage Objekt für Aktiv/Inaktiv Zustand,style=JavaStyle]{../src/bank/communication/request/IsActiveRequest.java}
+\lstinputlisting[language=java,caption=Anfrage Objekt um Geld abzuheben,style=JavaStyle]{../src/bank/communication/request/DepositRequest.java}
+\lstinputlisting[language=java,caption=Anfrage Objekt um Geld einzuzahlen,style=JavaStyle]{../src/bank/communication/request/WithdrawRequest.java}
+
+\subsection{Antworten}
+\lstinputlisting[language=java,caption=Interface für Antwort Objekte,style=JavaStyle]{../src/bank/communication/answer/IAnswer.java}
+\lstinputlisting[language=java,caption=Allgemeines Antwort Ojekt,style=JavaStyle]{../src/bank/communication/answer/Answer.java}
+\lstinputlisting[language=java,caption=Antwort Objekt für IllegalArgumentException,style=JavaStyle]{../src/bank/communication/answer/IllegalArgumentExceptionAnswer.java}
+\lstinputlisting[language=java,caption=Antwort Objekt für InactiveException,style=JavaStyle]{../src/bank/communication/answer/InactiveExceptionAnswer.java}
+\lstinputlisting[language=java,caption=Antwort Objekt für IOException,style=JavaStyle]{../src/bank/communication/answer/IOExceptionAnswer.java}
+\lstinputlisting[language=java,caption=Antwort Objekt für OverdrawException,style=JavaStyle]{../src/bank/communication/answer/OverdrawExceptionAnswer.java}
+
+
+
+% Inhalt Ende 
+\end{document} 

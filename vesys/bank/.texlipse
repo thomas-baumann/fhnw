@@ -1,0 +1,14 @@
+#TeXlipse project settings
+#Fri Mar 15 18:58:54 CET 2013
+markTmpDer=true
+builderNum=2
+outputDir=code/
+makeIndSty=
+bibrefDir=
+outputFormat=pdf
+tempDir=tmp
+mainTexFile=Thomas_Baumann_Uebung-2.tex
+outputFile=Thomas_Baumann_Uebung-2.pdf
+langSpell=de
+markDer=true
+srcDir=code/

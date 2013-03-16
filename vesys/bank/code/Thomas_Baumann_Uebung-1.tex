@@ -1,0 +1,181 @@
+\documentclass[10pt]{article}
+
+%Math
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{ulem}
+%\usepackage{stmaryrd} %f\UTF{00FC}r Blitz!
+
+% PageStyle
+\usepackage[ngerman]{babel} % deutsche Silbentrennung
+\usepackage[utf8]{inputenc}
+\usepackage{fancyhdr, graphicx}
+\usepackage[scaled=0.92]{helvet}
+\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage[a4paper,top=2cm]{geometry}
+\setlength{\textwidth}{17cm}
+\setlength{\oddsidemargin}{-0.5cm}
+
+
+% Shortcommands
+\newcommand{\Bold}[1]{\textbf{#1}} %Boldface
+\newcommand{\Kursiv}[1]{\textit{#1}} %Italic
+\newcommand{\T}[1]{\text{#1}} %Textmode
+\newcommand{\Nicht}[1]{\T{\sout{$ #1 $}}} %Streicht Shit durch
+
+%Arrows
+\newcommand{\lra}{\leftrightarrow} 
+\newcommand{\ra}{\rightarrow}
+\newcommand{\la}{\leftarrow}
+\newcommand{\lral}{\longleftrightarrow}
+\newcommand{\ral}{\longrightarrow}
+\newcommand{\lal}{\longleftarrow}
+\newcommand{\Lra}{\Leftrightarrow}
+\newcommand{\Ra}{\Rightarrow}
+\newcommand{\La}{\Leftarrow}
+\newcommand{\Lral}{\Longleftrightarrow}
+\newcommand{\Ral}{\Longrightarrow}
+\newcommand{\Lal}{\Longleftarrow}
+
+% Code listenings
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{caption}
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white}
+\lstdefinestyle{JavaStyle}{
+ language=Java,
+ basicstyle=\footnotesize\ttfamily, % Standardschrift
+ numbers=left,               % Ort der Zeilennummern
+ numberstyle=\tiny,          % Stil der Zeilennummern
+ stepnumber=1,              % Abstand zwischen den Zeilennummern
+ numbersep=5pt,              % Abstand der Nummern zum Text
+ tabsize=2,                  % Groesse von Tabs
+ extendedchars=true,         %
+ breaklines=true,            % Zeilen werden Umgebrochen
+ frame=b,         
+ %commentstyle=\itshape\color{LightLime}, Was isch das? O_o
+ %keywordstyle=\bfseries\color{DarkPurple}, und das O_o
+ basicstyle=\footnotesize\ttfamily,
+ stringstyle=\color[RGB]{42,0,255}\ttfamily, % Farbe der String
+ keywordstyle=\color[RGB]{127,0,85}\ttfamily, % Farbe der Keywords
+ commentstyle=\color[RGB]{63,127,95}\ttfamily, % Farbe des Kommentars
+ showspaces=false,           % Leerzeichen anzeigen ?
+ showtabs=false,             % Tabs anzeigen ?
+ xleftmargin=17pt,
+ framexleftmargin=17pt,
+ framexrightmargin=5pt,
+ framexbottommargin=4pt,
+ showstringspaces=false      % Leerzeichen in Strings anzeigen ?
+}
+
+%Config
+\renewcommand{\headrulewidth}{0pt}
+\setlength{\headheight}{15.2pt}
+\let\stdsection\section
+\renewcommand{\section}{\newpage\stdsection}
+\usepackage{dirtree}
+
+%Metadata
+\fancyfoot[C]{}
+\title{
+	\vspace{5cm}
+	Verteilte Systeme FS 13\\
+	%\vspace{1cm}
+	Übung 1
+}
+\author{Thomas Baumann}
+\date{4. März 2013}
+
+
+% hier beginnt das Dokument
+\begin{document}
+
+% Titelbild
+\maketitle
+\thispagestyle{fancy}
+
+\newpage
+
+% Inhaltsverzeichnis
+\pagenumbering{Roman}
+\tableofcontents	  	
+
+
+\newpage
+\setcounter{page}{1}
+\pagenumbering{arabic}
+
+% Inhalt Start
+\section{Beschreibung}
+\Bold{Ich habe die vorgegeben Klassen teilweise umbennant, damit es keine 
+Probleme mit dem Verständnis der Klassennamen gibt. So beginnen alle Interface mit einem I. 
+Alle Dateien sind auf der nächsten Seite aufgelistet.}
+
+Ich habe sowohl den Client, wie auch den Server in Java programmiert. Deshalb habe ich als 
+Kommunikationsart den Object-Stream gewählt.
+
+Für jede Anfrage wird ein einzelnes Objekt erstellt und gesendet. Diese Objekte sind vom 
+Interface \Kursiv{IRequest} abgeleitet, damit kann auf dem Server immer die gleiche 
+Methode verwendet werden, um die Anfrage zu bearbeiten. Damit die Verarbeitung 
+durchgeführt werden kann, ruft der Server die Methode \Kursiv{handleRequest(IBank)} auf 
+dem erhaltenen Objekt auf und übergibt dabei seine Bank. Als Rückgabewert erhält der 
+Server ein Antwortobjekt (Abgeleitet vom Interface \Kursiv{IAnswer}), welches er 
+zurücksenden kann. Damit die Exceptions auch über das Netzwerk gesendet werden können, 
+existieren für diese eigene Klassen.
+
+Der Client liest das erhaltene Objekt vom \Kursiv{ObjectInputStream} und ruft die 
+\Kursiv{getData()} Methode auf, diese liefert im Normalfall ein \Kursiv{Object} zurück 
+oder wenn ein Fehler auftritt, wird eine Exception geworfen. Dieses Objekt wird in 
+das erwartete Resultat gecastet und an das GUI weitergeleitet. Sollte nicht das korrekte 
+Objekt angekommen sein, so wird eine \Kursiv{IOException} geworfen.
+
+
+\include{file_structure}
+
+\section{Code: Aufgabe A}
+
+\lstinputlisting[language=java,caption=Local Driver,style=JavaStyle]{../src/bank/local/Driver.java}
+\lstinputlisting[language=java,caption=Bank Implementation,style=JavaStyle]{../src/bank/local/Bank.java}
+
+
+\section{Code: Aufgabe B}
+\subsection{Client}
+\lstinputlisting[language=java,caption=Client Socket Driver,style=JavaStyle]{../src/bank/socket/ClientDriver.java}
+
+\subsection{Server}
+\lstinputlisting[language=java,caption=Start des Servers,style=JavaStyle]{../src/bank/StartServer.java}
+\lstinputlisting[language=java,caption=Interface für Server Driver,style=JavaStyle]{../src/bank/IServerDriver.java}
+\lstinputlisting[language=java,caption=Server Socket Driver,style=JavaStyle]{../src/bank/socket/ServerDriver.java}
+
+\subsection{Kommunikation Objekte}
+\subsubsection{Interface}
+\lstinputlisting[language=java,caption=Interface für Request Objekte,style=JavaStyle]{../src/bank/communication/request/IRequest.java}
+\lstinputlisting[language=java,caption=Interface für Answer Objekte,style=JavaStyle]{../src/bank/communication/answer/IAnswer.java}
+
+\subsubsection{Anfrage Objekte}
+\lstinputlisting[language=java,caption=Anfrage Objekt um Konto zu eröffnen,style=JavaStyle]{../src/bank/communication/request/CreateAccountRequest.java}
+\lstinputlisting[language=java,caption=Anfrage Objekt um Konto zu schliessen,style=JavaStyle]{../src/bank/communication/request/CloseAccountRequest.java}
+\lstinputlisting[language=java,caption=Anfrage Objekt um Konto abzufragen,style=JavaStyle]{../src/bank/communication/request/GetAccountRequest.java}
+\lstinputlisting[language=java,caption=Anfrage Objekt um Kontonummer abzufragen,style=JavaStyle]{../src/bank/communication/request/GetAccountNumbersRequest.java}
+\lstinputlisting[language=java,caption=Anfrage Objekt um Geld zu transferieren,style=JavaStyle]{../src/bank/communication/request/TransferRequest.java}
+\lstinputlisting[language=java,caption=Anfrage Objekt um Kontobesitzer abzufragen,style=JavaStyle]{../src/bank/communication/request/GetOwnerRequest.java}
+\lstinputlisting[language=java,caption=Anfrage Objekt um Kontostand abzufragen,style=JavaStyle]{../src/bank/communication/request/GetBalanceRequest.java}
+\lstinputlisting[language=java,caption=Anfrage Objekt für Aktiv/Inaktiv Zustand,style=JavaStyle]{../src/bank/communication/request/IsActiveRequest.java}
+\lstinputlisting[language=java,caption=Anfrage Objekt um Geld abzuheben,style=JavaStyle]{../src/bank/communication/request/DepositRequest.java}
+\lstinputlisting[language=java,caption=Anfrage Objekt um Geld einzuzahlen,style=JavaStyle]{../src/bank/communication/request/WithdrawRequest.java}
+
+\subsubsection{Antwort Objekte}
+\lstinputlisting[language=java,caption=Allgemeines Antwort Objekt,style=JavaStyle]{../src/bank/communication/answer/Answer.java}
+\lstinputlisting[language=java,caption=Antwort Objekt für IllegalArgumentException,style=JavaStyle]{../src/bank/communication/answer/IllegalArgumentExceptionAnswer.java}
+\lstinputlisting[language=java,caption=Antwort Objekt für InactiveException,style=JavaStyle]{../src/bank/communication/answer/InactiveExceptionAnswer.java}
+\lstinputlisting[language=java,caption=Antwort Objekt für IOException,style=JavaStyle]{../src/bank/communication/answer/IOExceptionAnswer.java}
+\lstinputlisting[language=java,caption=Antwort Objekt für OverdrawException,style=JavaStyle]{../src/bank/communication/answer/OverdrawExceptionAnswer.java}
+
+% Inhalt Ende 
+\end{document} 
