@@ -25,7 +25,7 @@ public interface IAnswer<T> extends Serializable {
      * @throws OverdrawException When answer is an OverdrawException
      * @throws InactiveException When answer is an InactiveException
      */
-    public T getData() throws IllegalArgumentException, IOException,
-            OverdrawException, InactiveException;
+    public T getData() throws IllegalArgumentException, IOException, OverdrawException,
+            InactiveException;
 
 }
