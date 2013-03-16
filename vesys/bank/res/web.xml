@@ -8,11 +8,21 @@
     <servlet>
         <servlet-name>BankServerServlet</servlet-name>
         <servlet-class>bank.servlet.ServerServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet>
+        <servlet-name>BankWebsiteServlet</servlet-name>
+        <servlet-class>bank.servlet.WebsiteServlet</servlet-class>
+        <load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet-mapping>
         <servlet-name>BankServerServlet</servlet-name>
-        <url-pattern>/</url-pattern>
+        <url-pattern>/java.html</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>BankWebsiteServlet</servlet-name>
+        <url-pattern>/index.html</url-pattern>
     </servlet-mapping>
 
 </web-app>
