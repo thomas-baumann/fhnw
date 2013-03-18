@@ -102,7 +102,7 @@
 	Übung 2
 }
 \author{Thomas Baumann}
-\date{16. März 2013}
+\date{18. März 2013}
 
 
 % hier beginnt das Dokument
@@ -125,40 +125,56 @@
 
 % Inhalt Start
 \section{Beschreibung}
-Im Vergleich zur ersten Übung habe ich nur noch ein Antwort Objekt für Rückgabewerte und für die vier Exception jeweils ein Antwort Objekt.
+Für die Übung 2 habe ich das zur Verfügung gestellte Java GUI für den Clienten verwendet. 
+Auf der Serverseite implementierte ich ein Servlet für einen Tomcat Server. Wie in Übung 1
+werden serialisierte Objekte zwischen dem Clienten und Server versendet. Die Objekte 
+habe ich gemäss Ihrem Vorschlag in Übung 1 abgeändert. So gibt es nur noch ein 
+Antwortobjekt, welches generisch ist. Für die Exception verwende ich weiterhin eigene 
+Objekte. Die Antwortobjekte sind nur soweit angepasst worden, dass sie die generischen 
+Klassen verwenden können.
+
+Ich habe ein zweites Servlet erstellt, welches ermöglicht die vorhandenen Konten anzusehen, 
+wenn man das korrekte Passwort eingibt. Damit dieses Servlet (\Kursiv{WebsiteServlet}) auf 
+das Bank Attribut des ersten Servlet (\Kursiv{ServerServlet}) zugreifen kann, wird in der 
+\Kursiv{init} Methode des ersten Servlet die Bank als Attribute des Servlet Kontextes 
+gesetzt. Dem gegnüber steht das Laden des Servlet Kontext Attributes in der \Kursiv{init} 
+Methode des \Kursiv{WebsiteServlet}. Damit diese beiden Befehle in der korrekten 
+Reihenfolge ausgeführt werden, ist in der Servlet Konfiguration \Kursiv{load-on-startup} 
+gesetzt. Mit den numerischen Werten \Kursiv{1} bzw. \Kursiv{2} wird das nacheinander laden 
+der Servlets erreicht.
+
+Wie bereits die Übung 1, ist diese Lösung nicht Thread-Save.
 
 \section{Server}
 \lstinputlisting[language=XMLStyle,caption=Servlet Konfiguration]{../res/web.xml}
-\lstinputlisting[language=java,caption=Server Servlet,style=JavaStyle]{../src/bank/servlet/ServerServlet.java}
-\lstinputlisting[language=java,caption=Server Servlet,style=JavaStyle]{../src/bank/servlet/WebsiteServlet.java}
+\lstinputlisting[language=java,caption=Server Servlet für Java GUI,style=JavaStyle]{../src/bank/servlet/ServerServlet.java}
+\lstinputlisting[language=java,caption=Server Servlet für Browser,style=JavaStyle]{../src/bank/servlet/WebsiteServlet.java}
 
 \section{Client}
-\lstinputlisting[language=java,caption=Abstract Client Driver ,style=JavaStyle]{../src/bank/communication/AbstractClientDriver.java}
+\lstinputlisting[language=java,caption=Abstract Client Driver,style=JavaStyle]{../src/bank/communication/AbstractClientDriver.java}
 \lstinputlisting[language=java,caption=Servlet Client Driver,style=JavaStyle]{../src/bank/servlet/ClientDriver.java}
 
 \section{Kommunikation Objekte}
 \subsection{Anfragen}
-\lstinputlisting[language=java,caption=Interface für Request Objekte,style=JavaStyle]{../src/bank/communication/request/IRequest.java}
-\lstinputlisting[language=java,caption=Anfrage Objekt um Konto zu eröffnen,style=JavaStyle]{../src/bank/communication/request/CreateAccountRequest.java}
-\lstinputlisting[language=java,caption=Anfrage Objekt um Konto zu schliessen,style=JavaStyle]{../src/bank/communication/request/CloseAccountRequest.java}
-\lstinputlisting[language=java,caption=Anfrage Objekt um Konto abzufragen,style=JavaStyle]{../src/bank/communication/request/GetAccountRequest.java}
-\lstinputlisting[language=java,caption=Anfrage Objekt um Kontonummer abzufragen,style=JavaStyle]{../src/bank/communication/request/GetAccountNumbersRequest.java}
-\lstinputlisting[language=java,caption=Anfrage Objekt um Geld zu transferieren,style=JavaStyle]{../src/bank/communication/request/TransferRequest.java}
-\lstinputlisting[language=java,caption=Anfrage Objekt um Kontobesitzer abzufragen,style=JavaStyle]{../src/bank/communication/request/GetOwnerRequest.java}
-\lstinputlisting[language=java,caption=Anfrage Objekt um Kontostand abzufragen,style=JavaStyle]{../src/bank/communication/request/GetBalanceRequest.java}
-\lstinputlisting[language=java,caption=Anfrage Objekt für Aktiv/Inaktiv Zustand,style=JavaStyle]{../src/bank/communication/request/IsActiveRequest.java}
-\lstinputlisting[language=java,caption=Anfrage Objekt um Geld abzuheben,style=JavaStyle]{../src/bank/communication/request/DepositRequest.java}
-\lstinputlisting[language=java,caption=Anfrage Objekt um Geld einzuzahlen,style=JavaStyle]{../src/bank/communication/request/WithdrawRequest.java}
+\lstinputlisting[language=java,caption=Interface für Anfrageobjekte,style=JavaStyle]{../src/bank/communication/request/IRequest.java}
+\lstinputlisting[language=java,caption=Anfrageobjekt um Konto zu eröffnen,style=JavaStyle]{../src/bank/communication/request/CreateAccountRequest.java}
+\lstinputlisting[language=java,caption=Anfrageobjekt um Konto zu schliessen,style=JavaStyle]{../src/bank/communication/request/CloseAccountRequest.java}
+\lstinputlisting[language=java,caption=Anfrageobjekt um Konto abzufragen,style=JavaStyle]{../src/bank/communication/request/GetAccountRequest.java}
+\lstinputlisting[language=java,caption=Anfrageobjekt um Kontonummer abzufragen,style=JavaStyle]{../src/bank/communication/request/GetAccountNumbersRequest.java}
+\lstinputlisting[language=java,caption=Anfrageobjekt um Geld zu transferieren,style=JavaStyle]{../src/bank/communication/request/TransferRequest.java}
+\lstinputlisting[language=java,caption=Anfrageobjekt um Kontobesitzer abzufragen,style=JavaStyle]{../src/bank/communication/request/GetOwnerRequest.java}
+\lstinputlisting[language=java,caption=Anfrageobjekt um Kontostand abzufragen,style=JavaStyle]{../src/bank/communication/request/GetBalanceRequest.java}
+\lstinputlisting[language=java,caption=Anfrageobjekt für Aktiv/Inaktiv Zustand,style=JavaStyle]{../src/bank/communication/request/IsActiveRequest.java}
+\lstinputlisting[language=java,caption=Anfrageobjekt um Geld abzuheben,style=JavaStyle]{../src/bank/communication/request/DepositRequest.java}
+\lstinputlisting[language=java,caption=Anfrageobjekt um Geld einzuzahlen,style=JavaStyle]{../src/bank/communication/request/WithdrawRequest.java}
 
 \subsection{Antworten}
-\lstinputlisting[language=java,caption=Interface für Antwort Objekte,style=JavaStyle]{../src/bank/communication/answer/IAnswer.java}
-\lstinputlisting[language=java,caption=Allgemeines Antwort Ojekt,style=JavaStyle]{../src/bank/communication/answer/Answer.java}
-\lstinputlisting[language=java,caption=Antwort Objekt für IllegalArgumentException,style=JavaStyle]{../src/bank/communication/answer/IllegalArgumentExceptionAnswer.java}
-\lstinputlisting[language=java,caption=Antwort Objekt für InactiveException,style=JavaStyle]{../src/bank/communication/answer/InactiveExceptionAnswer.java}
-\lstinputlisting[language=java,caption=Antwort Objekt für IOException,style=JavaStyle]{../src/bank/communication/answer/IOExceptionAnswer.java}
-\lstinputlisting[language=java,caption=Antwort Objekt für OverdrawException,style=JavaStyle]{../src/bank/communication/answer/OverdrawExceptionAnswer.java}
-
-
+\lstinputlisting[language=java,caption=Interface für Antwortobjekte,style=JavaStyle]{../src/bank/communication/answer/IAnswer.java}
+\lstinputlisting[language=java,caption=Allgemeines Antwortojekt,style=JavaStyle]{../src/bank/communication/answer/Answer.java}
+\lstinputlisting[language=java,caption=Antwortobjekt für IllegalArgumentException,style=JavaStyle]{../src/bank/communication/answer/IllegalArgumentExceptionAnswer.java}
+\lstinputlisting[language=java,caption=Antwortobjekt für InactiveException,style=JavaStyle]{../src/bank/communication/answer/InactiveExceptionAnswer.java}
+\lstinputlisting[language=java,caption=Antwortobjekt für IOException,style=JavaStyle]{../src/bank/communication/answer/IOExceptionAnswer.java}
+\lstinputlisting[language=java,caption=Antwortobjekt für OverdrawException,style=JavaStyle]{../src/bank/communication/answer/OverdrawExceptionAnswer.java}
 
 % Inhalt Ende 
 \end{document} 
