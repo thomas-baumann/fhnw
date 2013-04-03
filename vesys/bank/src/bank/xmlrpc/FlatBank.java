@@ -15,19 +15,19 @@ public interface FlatBank {
 
     boolean getAccount(String number) throws IOException;
 
-    Object transfer(String fromNumber, String toNumber, double amount) throws IOException,
-            IllegalArgumentException, OverdrawException, InactiveException;
+    Object transfer(String fromNumber, String toNumber, double amount)
+            throws IOException, IllegalArgumentException, OverdrawException,
+            InactiveException;
 
     String getOwner(String number) throws IOException;
 
     boolean isActive(String number) throws IOException;
 
-    Object deposit(String number, double amount) throws IOException, IllegalArgumentException,
-            InactiveException;
+    Object deposit(String number, double amount) throws IOException,
+            IllegalArgumentException, InactiveException;
 
-    Object withdraw(String number, double amount) throws IOException, IllegalArgumentException,
-            OverdrawException, InactiveException;
+    Object withdraw(String number, double amount) throws IOException,
+            IllegalArgumentException, OverdrawException, InactiveException;
 
     double getBalance(String number) throws IOException;
-
 }

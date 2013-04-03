@@ -13,7 +13,6 @@ import bank.StartClient;
 
 public class ServerDriver implements IServerDriver {
 
-    
     @Override
     public void start(String[] args) throws IOException {
         if (args.length < 1) {
@@ -34,7 +33,8 @@ public class ServerDriver implements IServerDriver {
 
         PropertyHandlerMapping phm = new PropertyHandlerMapping();
         try {
-            phm.addHandler(bank.xmlrpc.FlatBank.class.getName(), bank.xmlrpc.ServerBank.class);
+            phm.addHandler(bank.xmlrpc.FlatBank.class.getName(),
+                    bank.xmlrpc.ServerBank.class);
             xmlRpcServer.setHandlerMapping(phm);
 
             XmlRpcServerConfigImpl serverConfig = (XmlRpcServerConfigImpl) xmlRpcServer
@@ -42,7 +42,6 @@ public class ServerDriver implements IServerDriver {
             serverConfig.setEnabledForExtensions(true);
             serverConfig.setEnabledForExceptions(true);
             serverConfig.setContentLengthOptional(false);
-            
 
             webServer.start();
             System.out.println("Server started at port: " + port);
@@ -50,8 +49,5 @@ public class ServerDriver implements IServerDriver {
             e.printStackTrace();
             System.exit(1);
         }
-
     }
-
-    
 }

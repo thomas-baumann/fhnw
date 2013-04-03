@@ -17,7 +17,7 @@ import bank.OverdrawException;
 import bank.StartClient;
 
 public class ClientDriver implements IBankDriver {
-    
+
     private IBank bank;
     private FlatBank flatBank;
 
@@ -31,71 +31,69 @@ public class ClientDriver implements IBankDriver {
         XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
         config.setServerURL(new URL(args[0]));
         config.setEnabledForExtensions(true);
-        //config.setConnectionTimeout(60 * 1000);
-        //config.setReplyTimeout(60 * 1000);
+        config.setEnabledForExceptions(true);
+        config.setContentLengthOptional(true);
 
         XmlRpcClient client = new XmlRpcClient();
 
         client.setConfig(config);
 
-        // make a call using dynamic proxy
         ClientFactory factory = new ClientFactory(client);
-        bank = new Bank();
-        flatBank = (FlatBank) factory.newInstance(FlatBank.class);
+        this.bank = new Bank();
+        this.flatBank = (FlatBank) factory.newInstance(FlatBank.class);
     }
 
     @Override
     public void disconnect() throws IOException {
-        // TODO Auto-generated method stub
-        
+        this.bank = null;
+        this.flatBank = null;
     }
 
     @Override
     public IBank getBank() {
-        // TODO Auto-generated method stub
-        return bank;
+        return this.bank;
     }
-    
+
     public class Bank implements IBank {
 
         @Override
         public String createAccount(String owner) throws IOException {
-            return flatBank.createAccount(owner);
+            return ClientDriver.this.flatBank.createAccount(owner);
         }
 
         @Override
         public boolean closeAccount(String number) throws IOException {
-            return flatBank.closeAccount(number);
+            return ClientDriver.this.flatBank.closeAccount(number);
         }
 
         @Override
         public Set<String> getAccountNumbers() throws IOException {
-            Object[] obj = flatBank.getAccountNumbers();
+            Object[] obj = ClientDriver.this.flatBank.getAccountNumbers();
             Set<String> set = new HashSet<>(obj.length);
             for (Object object : obj) {
-                set.add((String)object);
+                set.add((String) object);
             }
             return set;
         }
 
         @Override
         public IAccount getAccount(String number) throws IOException {
-            if (flatBank.getAccount(number)) {
+            if (ClientDriver.this.flatBank.getAccount(number)) {
                 return new Account(number);
             }
-            return null; 
+            return null;
         }
 
         @Override
         public void transfer(IAccount a, IAccount b, double amount) throws IOException,
                 IllegalArgumentException, OverdrawException, InactiveException {
-            flatBank.transfer(a.getNumber(), b.getNumber(), amount);
+            ClientDriver.this.flatBank.transfer(a.getNumber(), b.getNumber(), amount);
         }
-        
+
         public class Account implements IAccount {
-            
+
             private String number;
-            
+
             public Account(String number) {
                 this.number = number;
             }
@@ -107,32 +105,30 @@ public class ClientDriver implements IBankDriver {
 
             @Override
             public String getOwner() throws IOException {
-                return flatBank.getOwner(number);
+                return ClientDriver.this.flatBank.getOwner(this.number);
             }
 
             @Override
             public boolean isActive() throws IOException {
-                return flatBank.isActive(number);
+                return ClientDriver.this.flatBank.isActive(this.number);
             }
 
             @Override
             public void deposit(double amount) throws IOException,
                     IllegalArgumentException, InactiveException {
-                flatBank.deposit(number, amount);
+                ClientDriver.this.flatBank.deposit(this.number, amount);
             }
 
             @Override
             public void withdraw(double amount) throws IOException,
                     IllegalArgumentException, OverdrawException, InactiveException {
-               flatBank.withdraw(number, amount);
+                ClientDriver.this.flatBank.withdraw(this.number, amount);
             }
 
             @Override
             public double getBalance() throws IOException {
-                return flatBank.getBalance(number);
+                return ClientDriver.this.flatBank.getBalance(this.number);
             }
-            
         }
     }
-
 }
