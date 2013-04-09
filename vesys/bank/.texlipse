@@ -1,5 +1,5 @@
 #TeXlipse project settings
-#Wed Apr 03 16:47:10 CEST 2013
+#Tue Apr 09 10:09:45 CEST 2013
 markTmpDer=true
 builderNum=2
 outputDir=code/
@@ -7,8 +7,8 @@ makeIndSty=
 bibrefDir=
 outputFormat=pdf
 tempDir=tmp
-mainTexFile=Thomas_Baumann_Uebung-3.tex
-outputFile=Thomas_Baumann_Uebung-3.pdf
+mainTexFile=Thomas_Baumann_Uebung-4.tex
+outputFile=Thomas_Baumann_Uebung-4.pdf
 langSpell=de
 markDer=true
 srcDir=code/
