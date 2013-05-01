@@ -1,0 +1,152 @@
+\documentclass[10pt]{article}
+
+%Math
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{ulem}
+\usepackage{stmaryrd} %f\UTF{00FC}r Blitz!
+
+%PageStyle
+\usepackage[ngerman]{babel} % deutsche Silbentrennung
+\usepackage[utf8]{inputenc} 
+\usepackage{fancyhdr, graphicx}
+\usepackage[scaled=0.92]{helvet}
+\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage[a4paper,top=2cm]{geometry}
+\setlength{\textwidth}{17cm}
+\setlength{\oddsidemargin}{-0.5cm}
+
+% Shortcommands
+\newcommand{\Bold}[1]{\textbf{#1}} %Boldface
+\newcommand{\Kursiv}[1]{\textit{#1}} %Italic
+\newcommand{\T}[1]{\text{#1}} %Textmode
+\newcommand{\Nicht}[1]{\T{\sout{$ #1 $}}} %Streicht Shit durch
+
+%Arrows
+\newcommand{\lra}{\leftrightarrow} 
+\newcommand{\ra}{\rightarrow}
+\newcommand{\la}{\leftarrow}
+\newcommand{\lral}{\longleftrightarrow}
+\newcommand{\ral}{\longrightarrow}
+\newcommand{\lal}{\longleftarrow}
+\newcommand{\Lra}{\Leftrightarrow}
+\newcommand{\Ra}{\Rightarrow}
+\newcommand{\La}{\Leftarrow}
+\newcommand{\Lral}{\Longleftrightarrow}
+\newcommand{\Ral}{\Longrightarrow}
+\newcommand{\Lal}{\Longleftarrow}
+
+% Code listenings
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{caption}
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white}
+\lstdefinestyle{sql}{
+ language=SQL,
+ basicstyle=\footnotesize\ttfamily, % Standardschrift
+ backgroundcolor=\color[RGB]{230,230,230}, % Hintergrundfarbe
+ numbers=left,               % Ort der Zeilennummern
+ numberstyle=\tiny,          % Stil der Zeilennummern
+ stepnumber=1,               % Abstand zwischen den Zeilennummern
+ numbersep=5pt,              % Abstand der Nummern zum Text
+ tabsize=2,                  % Groesse von Tabs
+ extendedchars=true,         %
+ breaklines=true,            % Zeilen werden Umgebrochen
+ frame=trbl,         
+ stringstyle=\color[RGB]{42,0,255} \ttfamily, % Farbe der String
+ keywordstyle=\color[RGB]{127,0,85} \ttfamily, % Farbe der Keywords
+ commentstyle=\color[RGB]{63,127,95} \ttfamily, % Farbe des Kommentars
+ showspaces=false,           % Leerzeichen anzeigen ?
+ showtabs=false,             % Tabs anzeigen ?
+ xleftmargin=17pt,
+ framexleftmargin=17pt,
+ framexrightmargin=5pt,
+ framexbottommargin=5pt,
+ framextopmargin=5pt,
+ showstringspaces=false      % Leerzeichen in Strings anzeigen ?        
+}
+
+%Config
+\renewcommand{\headrulewidth}{0pt}
+\setlength{\headheight}{15.2pt}
+
+%Metadata
+\fancyfoot[C]{}
+\title{
+	\vspace{4cm}
+	\huge{Datenbank-Architektur für Fortgeschrittene}\\
+	\vspace{0.2cm}
+	\Large{Ausarbeitung 1: Anfrageverarbeitung}\\
+}
+\author{Thomas Baumann / Egemen Kaba}
+\date{01.05.2013}
+
+
+% hier beginnt das Dokument
+\begin{document}
+
+% Titelbild
+\maketitle
+\thispagestyle{fancy}
+
+\newpage
+
+% Inhaltsverzeichnis
+\pagenumbering{Roman}
+\tableofcontents	  	
+
+
+\newpage
+\setcounter{page}{1}
+\pagenumbering{arabic}
+
+% Inhalt Start
+
+\section{Einleitung}
+\subsection{Sonderzächön}
+sind mägö cöäl! Hallo "Max" und "Moritz"!
+\section{Vorbereitung}
+\subsection{Einrichten Datenbasis}
+\begin{lstlisting}[style=sql]
+CREATE TABLE regions
+AS SELECT *
+  FROM dbarc00.regions;
+  
+CREATE TABLE nations
+AS SELECT *
+  FROM dbarc00.nations;
+
+CREATE TABLE parts
+AS SELECT *
+  FROM dbarc00.parts;
+  
+CREATE TABLE customers
+AS SELECT *
+  FROM dbarc00.customers;
+
+CREATE TABLE suppliers
+AS SELECT *
+  FROM dbarc00.suppliers;
+
+CREATE TABLE orders
+AS SELECT *
+  FROM dbarc00.orders;
+
+CREATE TABLE partsupps
+AS SELECT *
+  FROM dbarc00.partsupps;
+
+CREATE TABLE lineitems
+AS SELECT *
+  FROM dbarc00.lineitems;
+\end{lstlisting}
+
+
+% Inhalt Ende 
+\end{document} 
