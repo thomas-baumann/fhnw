@@ -183,6 +183,70 @@ haben jeweils das Query ausgetauscht um den Ausführungsplan zu erhalten.
 
 \section{Versuche ohne Index}
 \subsection{Projektion}
+\textbf{Statement}
+\begin{lstlisting}[style=sql]
+SELECT *
+FROM orders;
+\end{lstlisting}
+\textbf{Ausführungsplan}
+\begin{lstlisting}[style=queryexecutionplan]
+----------------------------------------------------------------------------                                                                                                                                                                                                                                 
+| Id  | Operation         | Name   | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                                 
+----------------------------------------------------------------------------                                                                                                                                                                                                                                 
+|   0 | SELECT STATEMENT  |        |  1579K|   209M|  6612   (1)| 00:01:20 |                                                                                                                                                                                                                                 
+|   1 |  TABLE ACCESS FULL| ORDERS |  1579K|   209M|  6612   (1)| 00:01:20 |                                                                                                                                                                                                                                 
+---------------------------------------------------------------------------- 
+\end{lstlisting}   
+\textbf{Reflexion} \newline
+Da alle Zeilen und Spalten der Tabelle ausgelesen werden müssen wird hier ein
+Full Table Scan durchgeführt. Aus der Statistik geht hervor, dass diese Tabelle
+1579K Zeilen umfasst, 209MB gross ist und ein Full Table Scan 6612 CPU-Indexpunkte
+beansprucht.
+
+\textbf{Statement}
+\begin{lstlisting}[style=sql]
+SELECT o_clerk
+FROM orders;
+\end{lstlisting}
+\textbf{Ausführungsplan}
+\begin{lstlisting}[style=queryexecutionplan]
+----------------------------------------------------------------------------                                                                                                                                                                                                                                 
+| Id  | Operation         | Name   | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                                 
+----------------------------------------------------------------------------                                                                                                                                                                                                                                 
+|   0 | SELECT STATEMENT  |        |  1579K|    25M|  6608   (1)| 00:01:20 |                                                                                                                                                                                                                                 
+|   1 |  TABLE ACCESS FULL| ORDERS |  1579K|    25M|  6608   (1)| 00:01:20 |                                                                                                                                                                                                                                 
+---------------------------------------------------------------------------- 
+\end{lstlisting}   
+\textbf{Reflexion} \newline
+Es werden wiederum alle Zeile, jedoch nicht alle Spalten ausgelesen.
+Exakt läuft es so ab, dass zuerst die ganze Tabelle gelesen wird und danach die nicht
+benötigten Spalten herausgefiltert werden.
+Das verringert die Anzahl Daten, die gespeichert werden müssen, drastisch von 209MB auf 25MB.
+Zudem ist die benötigte CPU-Leistung minimal weniger, aufgrund der Reduktion des
+zu verwaltenden Speichers.
+
+\textbf{Statement}
+\begin{lstlisting}[style=sql]
+SELECT DISTINCT o_clerk
+FROM orders;
+\end{lstlisting}
+\textbf{Ausführungsplan}
+\begin{lstlisting}[style=queryexecutionplan]
+-------------------------------------------------------------------------------------                                                                                                                                                                                                                        
+| Id  | Operation          | Name   | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |                                                                                                                                                                                                                        
+-------------------------------------------------------------------------------------                                                                                                                                                                                                                        
+|   0 | SELECT STATEMENT   |        |  1579K|    25M|       | 15333   (1)| 00:03:04 |                                                                                                                                                                                                                        
+|   1 |  HASH UNIQUE       |        |  1579K|    25M|    36M| 15333   (1)| 00:03:04 |                                                                                                                                                                                                                        
+|   2 |   TABLE ACCESS FULL| ORDERS |  1579K|    25M|       |  6608   (1)| 00:01:20 |                                                                                                                                                                                                                        
+-------------------------------------------------------------------------------------
+\end{lstlisting} 
+\textbf{Reflexion} \newline
+Wie beim vorherigen Befehl werden alle Zeilen einer bestimmten Spalte ausgelesen,
+was wiederum einen Zugriff auf die gesamte Tabelle nötig macht.
+Zusätzlich zu diesem Aufwand müssen vorangehend alle doppelten Einträge herausgefiltert werden,
+was die massiv angestiegenen CPU-Kosten bei Id 0 und 1 erklärt.
+Die zusätzliche Operation mit der Id 1 dient dazu, die doppelten Werte herauszufiltern.
+Für die Speicherung von Zwischenresultaten wird dabei temporärer Speicher beansprucht.
 
 \subsection{Selektion}
 \begin{lstlisting}[style=sql]
@@ -326,6 +390,54 @@ Predicate Information (identified by operation id):
               "O_CLERK">='Clerk#000000130' AND "O_CLERK"<='Clerk#000000139')
 \end{lstlisting}
 TODO
+
+\subsection{Join}
+\textbf{Statement}
+\begin{lstlisting}[style=sql]
+SELECT *
+FROM orders, customers
+WHERE o_custkey = c_custkey
+AND o_orderkey < 100;
+\end{lstlisting}
+\textbf{Ausführungsplan}
+\begin{lstlisting}[style=queryexecutionplan]
+--------------------------------------------------------------------------------                                                                                                                                                                                                                             
+| Id  | Operation          | Name      | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                             
+--------------------------------------------------------------------------------                                                                                                                                                                                                                             
+|   0 | SELECT STATEMENT   |           |   267 | 80901 |  7555   (1)| 00:01:31 |                                                                                                                                                                                                                             
+|*  1 |  HASH JOIN         |           |   267 | 80901 |  7555   (1)| 00:01:31 |                                                                                                                                                                                                                             
+|*  2 |   TABLE ACCESS FULL| ORDERS    |   267 | 37113 |  6603   (1)| 00:01:20 |                                                                                                                                                                                                                             
+|   3 |   TABLE ACCESS FULL| CUSTOMERS |   131K|    20M|   951   (1)| 00:00:12 |                                                                                                                                                                                                                             
+-------------------------------------------------------------------------------- 
+\end{lstlisting}  
+\textbf{Varianten}
+\begin{lstlisting}[style=sql]
+SELECT *
+FROM customers, orders
+WHERE o_orderkey < 100
+AND c_custkey = o_custkey;
+\end{lstlisting}
+\begin{lstlisting}[style=sql]
+SELECT *
+FROM customers, orders
+WHERE c_custkey = o_custkey
+AND o_orderkey < 100;
+\end{lstlisting}
+\begin{lstlisting}[style=sql]
+SELECT *
+FROM customers, orders
+WHERE o_custkey = c_custkey
+AND o_orderkey < 100;
+\end{lstlisting}
+\textbf{Reflexion} \newline
+Der Optimizer wählt bei allen Varianten automatisch die Perfomanteste aus. Somit lautet die Antwort auf die Frage: Nein.
+Im Folgenden werden einige Gründe aufgeführt:
+Es wird ein Fremdschlüssel von orders und der Primärschlüssel von customers verglichen.
+Dadurch können in beiden Tabellen nicht benötigte Tuppel vorab herausgefiltert werden.
+Dies hat den Vorteil, dass weniger Speicher und CPU für weitere Operationen benötigt werden.
+Danach werden die restlichen Tuppel der Tabelle orders mit der zweiten Bedingung herausgefiltert.
+Wenn nun die minimalst mögliche Anzahl Tuppel erreicht worden sind, wird auf die Tabelle
+customers zugegriffen und mit der Tabelle orders gejoint.
 
 % Inhalt Ende 
 \end{document} 
