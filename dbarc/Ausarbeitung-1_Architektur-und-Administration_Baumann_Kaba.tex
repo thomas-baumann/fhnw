@@ -44,38 +44,47 @@
 \usepackage{xcolor}
 \usepackage{listings}
 \usepackage{caption}
-\DeclareCaptionFont{white}{\color{white}}
-\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
-\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white}
+\DeclareCaptionFont{white}{\color{black}}
+\DeclareCaptionFormat{listing}{\colorbox{white}{\parbox{\textwidth}{#1#2#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white,font=bf}
+
+
+\lstdefinestyle{sqlNoTitle}{
+   language=SQL,
+   basicstyle=\footnotesize\ttfamily, % Standardschrift
+   backgroundcolor=\color[RGB]{230,230,230}, % Hintergrundfarbe
+   numbers=left,               % Ort der Zeilennummern
+   numberstyle=\tiny,          % Stil der Zeilennummern
+   stepnumber=1,               % Abstand zwischen den Zeilennummern
+   numbersep=5pt,              % Abstand der Nummern zum Text
+   tabsize=2,                  % Groesse von Tabs
+   extendedchars=true,         %
+   breaklines=true,            % Zeilen werden Umgebrochen
+   frame=trbl,                 % Rahmen
+   stringstyle=\color[RGB]{42,0,255} \ttfamily, % Farbe der String
+   keywordstyle=\color[RGB]{127,0,85} \ttfamily, % Farbe der Keywords
+   commentstyle=\color[RGB]{63,127,95} \ttfamily, % Farbe des Kommentars
+   showspaces=false,           % Leerzeichen anzeigen ?
+   showtabs=false,             % Tabs anzeigen ?
+   xleftmargin=17pt,
+   framexleftmargin=17pt,
+   framexrightmargin=5pt,
+   framexbottommargin=5pt,
+   framextopmargin=5pt,
+   showstringspaces=false,     % Leerzeichen in Strings anzeigen ?
+}
+
+
 \lstdefinestyle{sql}{
- language=SQL,
- basicstyle=\footnotesize\ttfamily, % Standardschrift
- backgroundcolor=\color[RGB]{230,230,230}, % Hintergrundfarbe
- numbers=left,               % Ort der Zeilennummern
- numberstyle=\tiny,          % Stil der Zeilennummern
- stepnumber=1,               % Abstand zwischen den Zeilennummern
- numbersep=5pt,              % Abstand der Nummern zum Text
- tabsize=2,                  % Groesse von Tabs
- extendedchars=true,         %
- breaklines=true,            % Zeilen werden Umgebrochen
- frame=trbl,                 % Rahmen
- stringstyle=\color[RGB]{42,0,255} \ttfamily, % Farbe der String
- keywordstyle=\color[RGB]{127,0,85} \ttfamily, % Farbe der Keywords
- commentstyle=\color[RGB]{63,127,95} \ttfamily, % Farbe des Kommentars
- showspaces=false,           % Leerzeichen anzeigen ?
- showtabs=false,             % Tabs anzeigen ?
- xleftmargin=17pt,
- framexleftmargin=17pt,
- framexrightmargin=5pt,
- framexbottommargin=5pt,
- framextopmargin=5pt,
- showstringspaces=false      % Leerzeichen in Strings anzeigen ?        
+   style=sqlNoTitle,
+   title=SQL-Query
 }
 
 \lstdefinestyle{queryexecutionplan}{
- basicstyle=\footnotesize\ttfamily, % Standardschrift
- backgroundcolor=\color[RGB]{240,255,240}, % Hintergrundfarbe
- frame=trbl,                 % Rahmen
+  basicstyle=\footnotesize\ttfamily, % Standardschrift
+  backgroundcolor=\color[RGB]{240,255,240}, % Hintergrundfarbe
+  frame=trbl,                 % Rahmen
+  title=Ausführungsplan
 }
 
 %Config
@@ -183,18 +192,16 @@ haben jeweils das Query ausgetauscht um den Ausführungsplan zu erhalten.
 
 \section{Versuche ohne Index}
 \subsection{Projektion}
-\textbf{Statement}
 \begin{lstlisting}[style=sql]
 SELECT *
 FROM orders;
 \end{lstlisting}
-\textbf{Ausführungsplan}
 \begin{lstlisting}[style=queryexecutionplan]
-----------------------------------------------------------------------------                                                                                                                                                                                                                                 
-| Id  | Operation         | Name   | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                                 
-----------------------------------------------------------------------------                                                                                                                                                                                                                                 
-|   0 | SELECT STATEMENT  |        |  1579K|   209M|  6612   (1)| 00:01:20 |                                                                                                                                                                                                                                 
-|   1 |  TABLE ACCESS FULL| ORDERS |  1579K|   209M|  6612   (1)| 00:01:20 |                                                                                                                                                                                                                                 
+----------------------------------------------------------------------------
+| Id  | Operation         | Name   | Rows  | Bytes | Cost (%CPU)| Time     |
+----------------------------------------------------------------------------
+|   0 | SELECT STATEMENT  |        |  1579K|   209M|  6612   (1)| 00:01:20 |
+|   1 |  TABLE ACCESS FULL| ORDERS |  1579K|   209M|  6612   (1)| 00:01:20 |
 ---------------------------------------------------------------------------- 
 \end{lstlisting}   
 \textbf{Reflexion} \newline
@@ -203,18 +210,16 @@ Full Table Scan durchgeführt. Aus der Statistik geht hervor, dass diese Tabelle
 1579K Zeilen umfasst, 209MB gross ist und ein Full Table Scan 6612 CPU-Indexpunkte
 beansprucht.
 
-\textbf{Statement}
 \begin{lstlisting}[style=sql]
 SELECT o_clerk
 FROM orders;
 \end{lstlisting}
-\textbf{Ausführungsplan}
 \begin{lstlisting}[style=queryexecutionplan]
-----------------------------------------------------------------------------                                                                                                                                                                                                                                 
-| Id  | Operation         | Name   | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                                 
-----------------------------------------------------------------------------                                                                                                                                                                                                                                 
-|   0 | SELECT STATEMENT  |        |  1579K|    25M|  6608   (1)| 00:01:20 |                                                                                                                                                                                                                                 
-|   1 |  TABLE ACCESS FULL| ORDERS |  1579K|    25M|  6608   (1)| 00:01:20 |                                                                                                                                                                                                                                 
+----------------------------------------------------------------------------
+| Id  | Operation         | Name   | Rows  | Bytes | Cost (%CPU)| Time     |
+----------------------------------------------------------------------------
+|   0 | SELECT STATEMENT  |        |  1579K|    25M|  6608   (1)| 00:01:20 |
+|   1 |  TABLE ACCESS FULL| ORDERS |  1579K|    25M|  6608   (1)| 00:01:20 |
 ---------------------------------------------------------------------------- 
 \end{lstlisting}   
 \textbf{Reflexion} \newline
@@ -225,19 +230,17 @@ Das verringert die Anzahl Daten, die gespeichert werden müssen, drastisch von 2
 Zudem ist die benötigte CPU-Leistung minimal weniger, aufgrund der Reduktion des
 zu verwaltenden Speichers.
 
-\textbf{Statement}
 \begin{lstlisting}[style=sql]
 SELECT DISTINCT o_clerk
 FROM orders;
 \end{lstlisting}
-\textbf{Ausführungsplan}
 \begin{lstlisting}[style=queryexecutionplan]
--------------------------------------------------------------------------------------                                                                                                                                                                                                                        
-| Id  | Operation          | Name   | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |                                                                                                                                                                                                                        
--------------------------------------------------------------------------------------                                                                                                                                                                                                                        
-|   0 | SELECT STATEMENT   |        |  1579K|    25M|       | 15333   (1)| 00:03:04 |                                                                                                                                                                                                                        
-|   1 |  HASH UNIQUE       |        |  1579K|    25M|    36M| 15333   (1)| 00:03:04 |                                                                                                                                                                                                                        
-|   2 |   TABLE ACCESS FULL| ORDERS |  1579K|    25M|       |  6608   (1)| 00:01:20 |                                                                                                                                                                                                                        
+-------------------------------------------------------------------------------------
+| Id  | Operation          | Name   | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |
+-------------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT   |        |  1579K|    25M|       | 15333   (1)| 00:03:04 |
+|   1 |  HASH UNIQUE       |        |  1579K|    25M|    36M| 15333   (1)| 00:03:04 |
+|   2 |   TABLE ACCESS FULL| ORDERS |  1579K|    25M|       |  6608   (1)| 00:01:20 |
 -------------------------------------------------------------------------------------
 \end{lstlisting} 
 \textbf{Reflexion} \newline
@@ -266,12 +269,12 @@ Predicate Information (identified by operation id):
 ---------------------------------------------------
    1 - filter("O_ORDERKEY"=44444)
 \end{lstlisting}
-Es wird nur ein Tupel selektioniert, jedoch ist die Spalte „id“ nicht indexiert, 
-somit weiss die Datenbank nicht, wo genau sich die Datensätze auf der Disk 
-befinden. Da die „id“ nicht eindeutig ist, kann beim ersten gefundenen Datensatz 
-nicht abgebrochen werden. Daraus resultiert wieder ein Full Table Scan. Die 
-Kosten sind dank der Bedingung ein wenig kleiner, da viel weniger Hauptspeicher 
-benötigt wird.
+\textbf{Reflexion} \newline
+Es soll nur ein Tupel ausgewählt werden (Spalte ist Primary Key), da jedoch 
+kein index besteht, ist nicht bekannt, wo der Eintrag liegt und zusätzlich 
+kann nach dem ersten Fund nicht abgebrochen werden. Deshalb muss wieder ein 
+Full Table Scan durchgeführt werden. Durch die Bedingung wird viel weniger 
+Hauptspeicher benötigt.
 
 \begin{lstlisting}[style=sql]
 SELECT *
@@ -290,8 +293,9 @@ Predicate Information (identified by operation id):
 ---------------------------------------------------
    1 - filter("O_ORDERKEY"=44444 OR "O_CLERK"='Clerk#000000286')
 \end{lstlisting}
-Die Kosten sind hier durch den zusätzlichen Vergleich, welcher eine höhere 
-CPU Belastung verursacht, minimal gestiegen.
+\textbf{Reflexion} \newline
+Im Vergleich zum vorherigen Query sind nur die Kosten minimal gestiegen, dies 
+ist auf die zweite Bedingung zurück zu führen.
 
 \begin{lstlisting}[style=sql]
 SELECT *
@@ -310,8 +314,9 @@ Predicate Information (identified by operation id):
 ---------------------------------------------------
    1 - filter("O_ORDERKEY"=44444 AND "O_CLERK"='Clerk#000000286')
 \end{lstlisting}
-Die CPU-Kosten sind hier wieder kleiner, da aufgrund der AND-Verknüpfung die 
-zweite Bedingung nur überprüft werden muss, wenn die erste Bedingung erfüllt ist.
+\textbf{Reflexion} \newline
+Durch die AND-verknüpfung muss die zweite Bedingung nur überprüft werden, wenn 
+die Erste erfüllt ist. So sind alle Werte, ausser die Zeit gesunken.
 
 \begin{lstlisting}[style=sql]
 SELECT *
@@ -330,14 +335,14 @@ Predicate Information (identified by operation id):
 ---------------------------------------------------
    1 - filter("O_ORDERKEY"*2=44444 AND "O_CLERK"='Clerk#000000286')
 \end{lstlisting}
-Wenn man das Statement anschaut sollte die CPU Belastung höher sein, da eine 
-zusätzliche Operation pro Tupel notwendig ist $(o_orderkey * 2)$. Die Kosten 
-sind jedoch genau gleich wie beim vorherigen Statement. Wir vermuten, dass 
-dies optimiert wird zu:
-\begin{lstlisting}[style=sql]
+\textbf{Reflexion} \newline
+Die Werte sind alle genau gleich, wie beim vorherigen Query, obwohl eigentlich 
+eine zusätzliche Operation pro Zeile notwendig ist ($o\_orderkey*2$). Wir 
+vermuten, dass dieses Query vor der Abfrage optimiert wird, besser gesagt, die
+Berechnung wird vereinfacht, so muss nur eine Operation ausgeführt werden:
+\begin{lstlisting}[style=sqlNoTitle]
 o_orderkey = 22222 AND o_clerk = 'Clerk#000000286'
 \end{lstlisting}
-Dadurch würde die Operation nur einmal ausgeführt werden.
 
 \begin{lstlisting}[style=sql]
 SELECT *
@@ -356,19 +361,19 @@ Predicate Information (identified by operation id):
 ---------------------------------------------------
    1 - filter("O_ORDERKEY">=111111 AND "O_ORDERKEY"<=222222)
 \end{lstlisting}
-TODO CHECK
-Die Kosten sind kleiner als oben, obwohl laut Ausführungsplan die CPU Belastung 
-gleich ist und bei beiden ein Full Table Scan durchgeführt werden muss. Der 
-Hauptspeicher Verbrauch ist sogar grösser, woraus höhere Kosten resultieren 
-müssten. Diese Differenz kommt durch die Rundung der CPU Angabe. Wir habe mit 
-folgendem Statement den CPU Verbrauch genauer angezeigt:
-$SELECT
-CPU_COST
-FROM
-PLAN_TABLE;$
-Dadurch haben wir festgestellt, dass der CPU Verbrauch tatsächlich kleiner ist 
-als beim obigen Statement. Dies kommt daher, weil nur die Spalte „id“ 
-verglichen werden muss anstatt „id“ und „provider“.
+\textbf{Reflexion} \newline
+Die Selektion 
+\begin{lstlisting}[style=sqlNoTitle]
+column BETWEEN x AND y 
+\end{lstlisting}
+wird durch folgendes 
+\begin{lstlisting}[style=sqlNoTitle]
+column >= x AND column <= y 
+\end{lstlisting}
+ersetzt. Im Vergleich zum Vorherigen, sind die Anzahl Zeilen und die 
+Speicherbenutzung gestiegen, dies weil mehr Tupel selektiert werden. Hingegen 
+sind die Kosten gesunken, dies ist aus unserer Sicht dadurch zu Begründen, da 
+bei beiden Vergleichen, die gleiche Spalte verwendet wird.
 
 \begin{lstlisting}[style=sql]
 SELECT *
@@ -389,17 +394,18 @@ Predicate Information (identified by operation id):
    1 - filter("O_ORDERKEY">=44444 AND "O_ORDERKEY"<=55555 AND 
               "O_CLERK">='Clerk#000000130' AND "O_CLERK"<='Clerk#000000139')
 \end{lstlisting}
-TODO
+\textbf{Reflexion} \newline
+Auch hier wurden die BETWEEN wieder mit grösser gleich und kleiner gleich ersetzt. 
+Die Resultierende Anzahl Tupel und der benötigte Speicher sind nochmals gesunken. 
+Wohin gegen die Kosten gestiegen sind, da bis zu vier Vergleiche notwendig sind.
 
 \subsection{Join}
-\textbf{Statement}
 \begin{lstlisting}[style=sql]
 SELECT *
 FROM orders, customers
 WHERE o_custkey = c_custkey
 AND o_orderkey < 100;
 \end{lstlisting}
-\textbf{Ausführungsplan}
 \begin{lstlisting}[style=queryexecutionplan]
 --------------------------------------------------------------------------------                                                                                                                                                                                                                             
 | Id  | Operation          | Name      | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                             
