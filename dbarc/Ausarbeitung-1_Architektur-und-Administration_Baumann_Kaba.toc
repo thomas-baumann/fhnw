@@ -3,3 +3,7 @@
 \contentsline {subsection}{\numberline {1.1}Sonderz\IeC {\"a}ch\IeC {\"o}n}{1}
 \contentsline {section}{\numberline {2}Vorbereitung}{1}
 \contentsline {subsection}{\numberline {2.1}Einrichten Datenbasis}{1}
+\contentsline {section}{\numberline {3}Ausf\IeC {\"u}hrungsplan}{1}
+\contentsline {section}{\numberline {4}Versuche ohne Index}{2}
+\contentsline {subsection}{\numberline {4.1}Projektion}{2}
+\contentsline {subsection}{\numberline {4.2}Selektion}{2}

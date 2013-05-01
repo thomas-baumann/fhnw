@@ -58,7 +58,7 @@
  tabsize=2,                  % Groesse von Tabs
  extendedchars=true,         %
  breaklines=true,            % Zeilen werden Umgebrochen
- frame=trbl,         
+ frame=trbl,                 % Rahmen
  stringstyle=\color[RGB]{42,0,255} \ttfamily, % Farbe der String
  keywordstyle=\color[RGB]{127,0,85} \ttfamily, % Farbe der Keywords
  commentstyle=\color[RGB]{63,127,95} \ttfamily, % Farbe des Kommentars
@@ -70,6 +70,12 @@
  framexbottommargin=5pt,
  framextopmargin=5pt,
  showstringspaces=false      % Leerzeichen in Strings anzeigen ?        
+}
+
+\lstdefinestyle{queryexecutionplan}{
+ basicstyle=\footnotesize\ttfamily, % Standardschrift
+ backgroundcolor=\color[RGB]{240,255,240}, % Hintergrundfarbe
+ frame=trbl,                 % Rahmen
 }
 
 %Config
@@ -146,6 +152,180 @@ AS SELECT *
   FROM dbarc00.lineitems;
 \end{lstlisting}
 
+\section{Ausführungsplan}
+\begin{lstlisting}[style=sql]
+EXPLAIN PLAN FOR
+SELECT *
+FROM parts;
+
+SELECT plan_table_output
+FROM TABLE(DBMS_XPLAN.DISPLAY('plan_table',null,'serial'));
+\end{lstlisting}
+\begin{lstlisting}[style=queryexecutionplan]
+---------------------------------------------------------------------------
+| Id  | Operation         | Name  | Rows  | Bytes | Cost (%CPU)| Time     |
+---------------------------------------------------------------------------
+|   0 | SELECT STATEMENT  |       |   190K|    26M|  1051   (1)| 00:00:13 |
+|   1 |  TABLE ACCESS FULL| PARTS |   190K|    26M|  1051   (1)| 00:00:13 |
+---------------------------------------------------------------------------
+\end{lstlisting}
+Die Tabelle zeigt die einzelnen Schritte des Ausführungsplanes, welche der 
+Optimizer erstellt hat, mit den jeweilig zurückgegebenen Zeilen, deren Grösse 
+und die Kosten für die Teilschritte. Die Kosten sind immer aufsummiert von 
+unten nach oben. Sie werden berechnet aus Disk I/O Zugriffen, CPU Belastung 
+und Hauptspeicher verbrauch. Der CPU Verbrauch wird immer gerundet, womit 
+wir die Differenzen nicht genau sehen.
+Man kann sich den Ausführungsplan als Baum vorstellen. Die Einrückungen 
+stellen die Knotentiefe dar.
+
+Für die nächsten Aufgaben verwenden wir das obenstehende Statement. Wir 
+haben jeweils das Query ausgetauscht um den Ausführungsplan zu erhalten.
+
+\section{Versuche ohne Index}
+\subsection{Projektion}
+
+\subsection{Selektion}
+\begin{lstlisting}[style=sql]
+SELECT *
+FROM orders
+WHERE o_orderkey = 44444;
+\end{lstlisting}
+\begin{lstlisting}[style=queryexecutionplan]
+----------------------------------------------------------------------------
+| Id  | Operation         | Name   | Rows  | Bytes | Cost (%CPU)| Time     |
+----------------------------------------------------------------------------
+|   0 | SELECT STATEMENT  |        |   267 | 37113 |  6603   (1)| 00:01:20 |
+|*  1 |  TABLE ACCESS FULL| ORDERS |   267 | 37113 |  6603   (1)| 00:01:20 |
+----------------------------------------------------------------------------
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+   1 - filter("O_ORDERKEY"=44444)
+\end{lstlisting}
+Es wird nur ein Tupel selektioniert, jedoch ist die Spalte „id“ nicht indexiert, 
+somit weiss die Datenbank nicht, wo genau sich die Datensätze auf der Disk 
+befinden. Da die „id“ nicht eindeutig ist, kann beim ersten gefundenen Datensatz 
+nicht abgebrochen werden. Daraus resultiert wieder ein Full Table Scan. Die 
+Kosten sind dank der Bedingung ein wenig kleiner, da viel weniger Hauptspeicher 
+benötigt wird.
+
+\begin{lstlisting}[style=sql]
+SELECT *
+FROM orders
+WHERE o_orderkey = 44444 OR o_clerk = 'Clerk#000000286';
+\end{lstlisting}
+\begin{lstlisting}[style=queryexecutionplan]
+----------------------------------------------------------------------------
+| Id  | Operation         | Name   | Rows  | Bytes | Cost (%CPU)| Time     |
+----------------------------------------------------------------------------
+|   0 | SELECT STATEMENT  |        |   267 | 37113 |  6631   (1)| 00:01:20 |
+|*  1 |  TABLE ACCESS FULL| ORDERS |   267 | 37113 |  6631   (1)| 00:01:20 |
+----------------------------------------------------------------------------
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+   1 - filter("O_ORDERKEY"=44444 OR "O_CLERK"='Clerk#000000286')
+\end{lstlisting}
+Die Kosten sind hier durch den zusätzlichen Vergleich, welcher eine höhere 
+CPU Belastung verursacht, minimal gestiegen.
+
+\begin{lstlisting}[style=sql]
+SELECT *
+FROM orders
+WHERE o_orderkey = 44444 AND o_clerk = 'Clerk#000000286';
+\end{lstlisting}
+\begin{lstlisting}[style=queryexecutionplan]
+----------------------------------------------------------------------------
+| Id  | Operation         | Name   | Rows  | Bytes | Cost (%CPU)| Time     |
+----------------------------------------------------------------------------
+|   0 | SELECT STATEMENT  |        |   158 | 21962 |  6612   (1)| 00:01:20 |
+|*  1 |  TABLE ACCESS FULL| ORDERS |   158 | 21962 |  6612   (1)| 00:01:20 |
+----------------------------------------------------------------------------
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+   1 - filter("O_ORDERKEY"=44444 AND "O_CLERK"='Clerk#000000286')
+\end{lstlisting}
+Die CPU-Kosten sind hier wieder kleiner, da aufgrund der AND-Verknüpfung die 
+zweite Bedingung nur überprüft werden muss, wenn die erste Bedingung erfüllt ist.
+
+\begin{lstlisting}[style=sql]
+SELECT *
+FROM orders
+WHERE o_orderkey*2 = 44444 AND o_clerk = 'Clerk#000000286';
+\end{lstlisting}
+\begin{lstlisting}[style=queryexecutionplan]
+----------------------------------------------------------------------------
+| Id  | Operation         | Name   | Rows  | Bytes | Cost (%CPU)| Time     |
+----------------------------------------------------------------------------
+|   0 | SELECT STATEMENT  |        |   158 | 21962 |  6616   (1)| 00:01:20 |
+|*  1 |  TABLE ACCESS FULL| ORDERS |   158 | 21962 |  6616   (1)| 00:01:20 |
+----------------------------------------------------------------------------
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+   1 - filter("O_ORDERKEY"*2=44444 AND "O_CLERK"='Clerk#000000286')
+\end{lstlisting}
+Wenn man das Statement anschaut sollte die CPU Belastung höher sein, da eine 
+zusätzliche Operation pro Tupel notwendig ist $(o_orderkey * 2)$. Die Kosten 
+sind jedoch genau gleich wie beim vorherigen Statement. Wir vermuten, dass 
+dies optimiert wird zu:
+\begin{lstlisting}[style=sql]
+o_orderkey = 22222 AND o_clerk = 'Clerk#000000286'
+\end{lstlisting}
+Dadurch würde die Operation nur einmal ausgeführt werden.
+
+\begin{lstlisting}[style=sql]
+SELECT *
+FROM orders
+WHERE o_orderkey BETWEEN 111111 AND 222222;
+\end{lstlisting}
+\begin{lstlisting}[style=queryexecutionplan]
+----------------------------------------------------------------------------
+| Id  | Operation         | Name   | Rows  | Bytes | Cost (%CPU)| Time     |
+----------------------------------------------------------------------------
+|   0 | SELECT STATEMENT  |        |   267 | 37113 |  6603   (1)| 00:01:20 |
+|*  1 |  TABLE ACCESS FULL| ORDERS |   267 | 37113 |  6603   (1)| 00:01:20 |
+----------------------------------------------------------------------------
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+   1 - filter("O_ORDERKEY">=111111 AND "O_ORDERKEY"<=222222)
+\end{lstlisting}
+TODO CHECK
+Die Kosten sind kleiner als oben, obwohl laut Ausführungsplan die CPU Belastung 
+gleich ist und bei beiden ein Full Table Scan durchgeführt werden muss. Der 
+Hauptspeicher Verbrauch ist sogar grösser, woraus höhere Kosten resultieren 
+müssten. Diese Differenz kommt durch die Rundung der CPU Angabe. Wir habe mit 
+folgendem Statement den CPU Verbrauch genauer angezeigt:
+$SELECT
+CPU_COST
+FROM
+PLAN_TABLE;$
+Dadurch haben wir festgestellt, dass der CPU Verbrauch tatsächlich kleiner ist 
+als beim obigen Statement. Dies kommt daher, weil nur die Spalte „id“ 
+verglichen werden muss anstatt „id“ und „provider“.
+
+\begin{lstlisting}[style=sql]
+SELECT *
+FROM orders
+WHERE o_orderkey BETWEEN 44444 AND 55555
+AND o_clerk BETWEEN 'Clerk#000000130' AND 'Clerk#000000139';
+\end{lstlisting}
+\begin{lstlisting}[style=queryexecutionplan]
+----------------------------------------------------------------------------
+| Id  | Operation         | Name   | Rows  | Bytes | Cost (%CPU)| Time     |
+----------------------------------------------------------------------------
+|   0 | SELECT STATEMENT  |        |    10 |  1390 |  6613   (1)| 00:01:20 |
+|*  1 |  TABLE ACCESS FULL| ORDERS |    10 |  1390 |  6613   (1)| 00:01:20 |
+----------------------------------------------------------------------------
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+   1 - filter("O_ORDERKEY">=44444 AND "O_ORDERKEY"<=55555 AND 
+              "O_CLERK">='Clerk#000000130' AND "O_CLERK"<='Clerk#000000139')
+\end{lstlisting}
+TODO
 
 % Inhalt Ende 
 \end{document} 
