@@ -160,6 +160,11 @@ CREATE TABLE lineitems
 AS SELECT *
   FROM dbarc00.lineitems;
 \end{lstlisting}
+\subsection{Tabellenstatistik}
+\begin{lstlisting}[style=sql]
+SELECT *
+FROM user_tab_statistics;
+\end{lstlisting}
 
 \section{Ausführungsplan}
 \begin{lstlisting}[style=sql]
@@ -500,7 +505,12 @@ Danach werden die restlichen Tuppel der Tabelle orders mit der zweiten Bedingung
 Wenn nun die minimalst mögliche Anzahl Tuppel erreicht worden sind, wird auf die Tabelle
 customers zugegriffen und mit der Tabelle orders gejoint.
 
+
 \section{Versuch mit Index}
+\begin{lstlisting}[style=sql]
+SELECT *
+FROM user_ind_statistics;
+\end{lstlisting}
 \subsection{Projektion}
 \begin{lstlisting}[style=sql]
 SELECT DISTINCT o_clerk
