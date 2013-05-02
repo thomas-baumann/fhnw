@@ -567,26 +567,25 @@ FROM orders
 WHERE o_orderkey = 44444 OR o_clerk = 'Clerk#000000286';
 \end{lstlisting}
 \begin{lstlisting}[style=queryexecutionplan]
----------------------------------------------------------------------------------------
-| Id  | Operation                        | Name          | Rows  | Bytes | Cost (%CPU)|
----------------------------------------------------------------------------------------
-|   0 | SELECT STATEMENT                 |               |  1501 |   162K|   336   (0)|
-|   1 |  TABLE ACCESS BY INDEX ROWID     | ORDERS        |  1501 |   162K|   336   (0)|
-|   2 |   BITMAP CONVERSION TO ROWIDS    |               |       |       |            |
-|   3 |    BITMAP OR                     |               |       |       |            |
-|   4 |     BITMAP CONVERSION FROM ROWIDS|               |       |       |            |
-|*  5 |      INDEX RANGE SCAN            | O_CLERK_IX    |       |       |     8   (0)|
-|   6 |     BITMAP CONVERSION FROM ROWIDS|               |       |       |            |
-|*  7 |      INDEX RANGE SCAN            | O_ORDERKEY_IX |       |       |     3   (0)|
----------------------------------------------------------------------------------------
-
-Predicate Information (identified by operation id):
----------------------------------------------------
-   5 - access("O_CLERK"='Clerk#000000286')
-   7 - access("O_ORDERKEY"=44444)
+--------------------------------------------------------------------------------------------------                                                                                                                                                                                                           
+| Id  | Operation                        | Name          | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                           
+--------------------------------------------------------------------------------------------------                                                                                                                                                                                                           
+|   0 | SELECT STATEMENT                 |               |  1501 |   162K|   336   (0)| 00:00:05 |                                                                                                                                                                                                           
+|   1 |  TABLE ACCESS BY INDEX ROWID     | ORDERS        |  1501 |   162K|   336   (0)| 00:00:05 |                                                                                                                                                                                                           
+|   2 |   BITMAP CONVERSION TO ROWIDS    |               |       |       |            |          |                                                                                                                                                                                                           
+|   3 |    BITMAP OR                     |               |       |       |            |          |                                                                                                                                                                                                           
+|   4 |     BITMAP CONVERSION FROM ROWIDS|               |       |       |            |          |                                                                                                                                                                                                           
+|*  5 |      INDEX RANGE SCAN            | O_CLERK_IX    |       |       |     8   (0)| 00:00:01 |                                                                                                                                                                                                           
+|   6 |     BITMAP CONVERSION FROM ROWIDS|               |       |       |            |          |                                                                                                                                                                                                           
+|*  7 |      INDEX RANGE SCAN            | O_ORDERKEY_IX |       |       |     3   (0)| 00:00:01 |                                                                                                                                                                                                           
+--------------------------------------------------------------------------------------------------                                                                                                                                                                                                           
+                                                                                                                                                                                                                                                                                                             
+Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
+---------------------------------------------------                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                             
+   5 - access("O_CLERK"='Clerk#000000286')                                                                                                                                                                                                                                                                   
+   7 - access("O_ORDERKEY"=44444)                                                                                                                                                                                                                                                                            
 \end{lstlisting}
-Zusatz: Zwecks besserer Darstellung wurden die Zeitangaben herausgenommen.
-Diese betrugen zwischen 00:00:01 und 00:00:05. \newline
 \textbf{Reflexion} \newline
 Durch den Zugriff auf Indizes wird auch hier direkt auf die benötigten Tuppel zugegriffen.
 Statt einer werden zwei Indizes verwendet, da die OR-Verknüpfung den Zugriff auf zwei indexierte Spalten verlangt.
@@ -683,27 +682,27 @@ WHERE o_orderkey BETWEEN 44444 AND 55555
 AND o_clerk BETWEEN 'Clerk#000000130' AND 'Clerk#000000139';
 \end{lstlisting}
 \begin{lstlisting}[style=queryexecutionplan]
----------------------------------------------------------------------------------------
-| Id  | Operation                        | Name          | Rows  | Bytes | Cost (%CPU)|
----------------------------------------------------------------------------------------
-|   0 | SELECT STATEMENT                 |               |     6 |   666 |    27  (12)|
-|   1 |  TABLE ACCESS BY INDEX ROWID     | ORDERS        |     6 |   666 |    27  (12)|
-|   2 |   BITMAP CONVERSION TO ROWIDS    |               |       |       |            |
-|   3 |    BITMAP AND                    |               |       |       |            |
-|   4 |     BITMAP CONVERSION FROM ROWIDS|               |       |       |            |
-|   5 |      SORT ORDER BY               |               |       |       |            |
-|*  6 |       INDEX RANGE SCAN           | O_ORDERKEY_IX |  2780 |       |     9   (0)|
-|   7 |     BITMAP CONVERSION FROM ROWIDS|               |       |       |            |
-|   8 |      SORT ORDER BY               |               |       |       |            |
-|*  9 |       INDEX RANGE SCAN           | O_CLERK_IX    |  2780 |       |    14   (0)|
----------------------------------------------------------------------------------------
-
+--------------------------------------------------------------------------------------------------
+| Id  | Operation                        | Name          | Rows  | Bytes | Cost (%CPU)| Time     |
+--------------------------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT                 |               |     6 |   666 |    27  (12)| 00:00:01 |
+|   1 |  TABLE ACCESS BY INDEX ROWID     | ORDERS        |     6 |   666 |    27  (12)| 00:00:01 |
+|   2 |   BITMAP CONVERSION TO ROWIDS    |               |       |       |            |          |
+|   3 |    BITMAP AND                    |               |       |       |            |          |
+|   4 |     BITMAP CONVERSION FROM ROWIDS|               |       |       |            |          |
+|   5 |      SORT ORDER BY               |               |       |       |            |          |
+|*  6 |       INDEX RANGE SCAN           | O_ORDERKEY_IX |  2780 |       |     9   (0)| 00:00:01 |
+|   7 |     BITMAP CONVERSION FROM ROWIDS|               |       |       |            |          |
+|   8 |      SORT ORDER BY               |               |       |       |            |          |
+|*  9 |       INDEX RANGE SCAN           | O_CLERK_IX    |  2780 |       |    14   (0)| 00:00:01 |
+--------------------------------------------------------------------------------------------------
+ 
 Predicate Information (identified by operation id):
 ---------------------------------------------------
+ 
    6 - access("O_ORDERKEY">=44444 AND "O_ORDERKEY"<=55555)
    9 - access("O_CLERK">='Clerk#000000130' AND "O_CLERK"<='Clerk#000000139')
 \end{lstlisting}
-Zusatz: Auf Zeitangaben wurde zwecks Darstellung verzichtet. \newline
 \textbf{Reflexion} \newline
 
 
