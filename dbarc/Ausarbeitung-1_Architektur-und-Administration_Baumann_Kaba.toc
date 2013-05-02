@@ -13,6 +13,7 @@
 \contentsline {subsection}{\numberline {5.1}Projektion}{8}
 \contentsline {subsection}{\numberline {5.2}Selektion}{8}
 \contentsline {subsection}{\numberline {5.3}Join}{12}
-\contentsline {section}{\numberline {6}Quiz}{12}
-\contentsline {section}{\numberline {7}Deep Left Join}{12}
-\contentsline {section}{\numberline {8}Eigene SQL-Anfragen}{13}
+\contentsline {subsection}{\numberline {5.4}Join}{12}
+\contentsline {section}{\numberline {6}Quiz}{14}
+\contentsline {section}{\numberline {7}Deep Left Join}{14}
+\contentsline {section}{\numberline {8}Eigene SQL-Anfragen}{21}
