@@ -87,6 +87,11 @@
   title=Ausführungsplan
 }
 
+\lstdefinestyle{queryexecutionplanSmall}{
+  style=queryexecutionplan,
+  basicstyle=\scriptsize\ttfamily, % Standardschrift
+}
+
 %Config
 \renewcommand{\headrulewidth}{0pt}
 \setlength{\headheight}{15.2pt}
@@ -445,11 +450,9 @@ AND c_custkey = o_custkey;
 --------------------------------------------------------------------------------
 
 Predicate Information (identified by operation id):
----------------------------------------------------                                                                                                                                                                                                                                                          
-                                                                                                                                                                                                                                                                                                             
-   1 - access("C_CUSTKEY"="O_CUSTKEY")                                                                                                                                                                                                                                                                       
-   2 - filter("O_ORDERKEY"<100)                                                                                                                                                                                                                                                                              
-
+---------------------------------------------------
+   1 - access("C_CUSTKEY"="O_CUSTKEY")
+   2 - filter("O_ORDERKEY"<100)
 \end{lstlisting}
 \begin{lstlisting}[style=sql]
 SELECT *
@@ -458,16 +461,16 @@ WHERE c_custkey = o_custkey
 AND o_orderkey < 100;
 \end{lstlisting}
 \begin{lstlisting}[style=queryexecutionplan]
---------------------------------------------------------------------------------                                                                                                                                                                                                                             
-| Id  | Operation          | Name      | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                             
---------------------------------------------------------------------------------                                                                                                                                                                                                                             
-|   0 | SELECT STATEMENT   |           |    25 |  6750 |  7555   (1)| 00:01:31 |                                                                                                                                                                                                                             
-|*  1 |  HASH JOIN         |           |    25 |  6750 |  7555   (1)| 00:01:31 |                                                                                                                                                                                                                             
-|*  2 |   TABLE ACCESS FULL| ORDERS    |    25 |  2775 |  6602   (1)| 00:01:20 |                                                                                                                                                                                                                             
-|   3 |   TABLE ACCESS FULL| CUSTOMERS |   150K|    22M|   951   (1)| 00:00:12 |                                                                                                                                                                                                                             
---------------------------------------------------------------------------------                                                                                                                                                                                                                             
-                                                                                                                                                                                                                                                                                                             
-Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
+--------------------------------------------------------------------------------
+| Id  | Operation          | Name      | Rows  | Bytes | Cost (%CPU)| Time     |
+--------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT   |           |    25 |  6750 |  7555   (1)| 00:01:31 |
+|*  1 |  HASH JOIN         |           |    25 |  6750 |  7555   (1)| 00:01:31 |
+|*  2 |   TABLE ACCESS FULL| ORDERS    |    25 |  2775 |  6602   (1)| 00:01:20 |
+|   3 |   TABLE ACCESS FULL| CUSTOMERS |   150K|    22M|   951   (1)| 00:00:12 |
+--------------------------------------------------------------------------------
+
+Predicate Information (identified by operation id):
 ---------------------------------------------------
    1 - access("C_CUSTKEY"="O_CUSTKEY")
    2 - filter("O_ORDERKEY"<100)
@@ -479,21 +482,19 @@ WHERE o_custkey = c_custkey
 AND o_orderkey < 100;
 \end{lstlisting}
 \begin{lstlisting}[style=queryexecutionplan]
---------------------------------------------------------------------------------                                                                                                                                                                                                                             
-| Id  | Operation          | Name      | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                             
---------------------------------------------------------------------------------                                                                                                                                                                                                                             
-|   0 | SELECT STATEMENT   |           |    25 |  6750 |  7555   (1)| 00:01:31 |                                                                                                                                                                                                                             
-|*  1 |  HASH JOIN         |           |    25 |  6750 |  7555   (1)| 00:01:31 |                                                                                                                                                                                                                             
-|*  2 |   TABLE ACCESS FULL| ORDERS    |    25 |  2775 |  6602   (1)| 00:01:20 |                                                                                                                                                                                                                             
-|   3 |   TABLE ACCESS FULL| CUSTOMERS |   150K|    22M|   951   (1)| 00:00:12 |                                                                                                                                                                                                                             
---------------------------------------------------------------------------------                                                                                                                                                                                                                             
-                                                                                                                                                                                                                                                                                                             
-Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
----------------------------------------------------                                                                                                                                                                                                                                                          
-                                                                                                                                                                                                                                                                                                             
-   1 - access("O_CUSTKEY"="C_CUSTKEY")                                                                                                                                                                                                                                                                       
-   2 - filter("O_ORDERKEY"<100)                                                                                                                                                                                                                                                                              
-   
+--------------------------------------------------------------------------------
+| Id  | Operation          | Name      | Rows  | Bytes | Cost (%CPU)| Time     |
+--------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT   |           |    25 |  6750 |  7555   (1)| 00:01:31 |
+|*  1 |  HASH JOIN         |           |    25 |  6750 |  7555   (1)| 00:01:31 |
+|*  2 |   TABLE ACCESS FULL| ORDERS    |    25 |  2775 |  6602   (1)| 00:01:20 |
+|   3 |   TABLE ACCESS FULL| CUSTOMERS |   150K|    22M|   951   (1)| 00:00:12 |
+--------------------------------------------------------------------------------
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+   1 - access("O_CUSTKEY"="C_CUSTKEY")
+   2 - filter("O_ORDERKEY"<100)
 \end{lstlisting}
 \textbf{Reflexion} \newline
 Der Optimizer wählt bei allen Varianten automatisch die Perfomanteste aus. Somit lautet die Antwort auf die Frage: Nein.
@@ -504,7 +505,6 @@ Dies hat den Vorteil, dass weniger Speicher und CPU für weitere Operationen ben
 Danach werden die restlichen Tuppel der Tabelle orders mit der zweiten Bedingung herausgefiltert.
 Wenn nun die minimalst mögliche Anzahl Tuppel erreicht worden sind, wird auf die Tabelle
 customers zugegriffen und mit der Tabelle orders gejoint.
-
 
 \section{Versuch mit Index}
 \begin{lstlisting}[style=sql]
@@ -564,7 +564,7 @@ WHERE o_orderkey = 44444;
 ----------------------------------------------------------------------------
 
 Predicate Information (identified by operation id):
----------------------------------------------------                                                                                                 
+---------------------------------------------------
    1 - filter("O_ORDERKEY"=44444)
 \end{lstlisting}
 \textbf{Reflexion} \newline
@@ -576,25 +576,24 @@ SELECT *
 FROM orders
 WHERE o_orderkey = 44444 OR o_clerk = 'Clerk#000000286';
 \end{lstlisting}
-\begin{lstlisting}[style=queryexecutionplan]
---------------------------------------------------------------------------------------------------                                                                                                                                                                                                           
-| Id  | Operation                        | Name          | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                           
---------------------------------------------------------------------------------------------------                                                                                                                                                                                                           
-|   0 | SELECT STATEMENT                 |               |  1501 |   162K|   336   (0)| 00:00:05 |                                                                                                                                                                                                           
-|   1 |  TABLE ACCESS BY INDEX ROWID     | ORDERS        |  1501 |   162K|   336   (0)| 00:00:05 |                                                                                                                                                                                                           
-|   2 |   BITMAP CONVERSION TO ROWIDS    |               |       |       |            |          |                                                                                                                                                                                                           
-|   3 |    BITMAP OR                     |               |       |       |            |          |                                                                                                                                                                                                           
-|   4 |     BITMAP CONVERSION FROM ROWIDS|               |       |       |            |          |                                                                                                                                                                                                           
-|*  5 |      INDEX RANGE SCAN            | O_CLERK_IX    |       |       |     8   (0)| 00:00:01 |                                                                                                                                                                                                           
-|   6 |     BITMAP CONVERSION FROM ROWIDS|               |       |       |            |          |                                                                                                                                                                                                           
-|*  7 |      INDEX RANGE SCAN            | O_ORDERKEY_IX |       |       |     3   (0)| 00:00:01 |                                                                                                                                                                                                           
---------------------------------------------------------------------------------------------------                                                                                                                                                                                                           
-                                                                                                                                                                                                                                                                                                             
-Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
----------------------------------------------------                                                                                                                                                                                                                                                          
-                                                                                                                                                                                                                                                                                                             
-   5 - access("O_CLERK"='Clerk#000000286')                                                                                                                                                                                                                                                                   
-   7 - access("O_ORDERKEY"=44444)                                                                                                                                                                                                                                                                            
+\begin{lstlisting}[style=queryexecutionplanSmall]
+--------------------------------------------------------------------------------------------------
+| Id  | Operation                        | Name          | Rows  | Bytes | Cost (%CPU)| Time     |
+--------------------------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT                 |               |  1501 |   162K|   336   (0)| 00:00:05 |
+|   1 |  TABLE ACCESS BY INDEX ROWID     | ORDERS        |  1501 |   162K|   336   (0)| 00:00:05 |
+|   2 |   BITMAP CONVERSION TO ROWIDS    |               |       |       |            |          |
+|   3 |    BITMAP OR                     |               |       |       |            |          |
+|   4 |     BITMAP CONVERSION FROM ROWIDS|               |       |       |            |          |
+|*  5 |      INDEX RANGE SCAN            | O_CLERK_IX    |       |       |     8   (0)| 00:00:01 |
+|   6 |     BITMAP CONVERSION FROM ROWIDS|               |       |       |            |          |
+|*  7 |      INDEX RANGE SCAN            | O_ORDERKEY_IX |       |       |     3   (0)| 00:00:01 |
+--------------------------------------------------------------------------------------------------
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+   5 - access("O_CLERK"='Clerk#000000286')
+   7 - access("O_ORDERKEY"=44444)
 \end{lstlisting}
 \textbf{Reflexion} \newline
 Durch den Zugriff auf Indizes wird auch hier direkt auf die benötigten Tuppel zugegriffen.
@@ -615,7 +614,7 @@ WHERE o_orderkey = 44444 AND o_clerk = 'Clerk#000000286';
 ---------------------------------------------------------------------------------------------
 
 Predicate Information (identified by operation id):
----------------------------------------------------                                                                 
+---------------------------------------------------
    1 - filter("O_CLERK"='Clerk#000000286')
    2 - access("O_ORDERKEY"=44444)
 \end{lstlisting}
@@ -691,7 +690,7 @@ FROM orders
 WHERE o_orderkey BETWEEN 44444 AND 55555
 AND o_clerk BETWEEN 'Clerk#000000130' AND 'Clerk#000000139';
 \end{lstlisting}
-\begin{lstlisting}[style=queryexecutionplan]
+\begin{lstlisting}[style=queryexecutionplanSmall]
 --------------------------------------------------------------------------------------------------
 | Id  | Operation                        | Name          | Rows  | Bytes | Cost (%CPU)| Time     |
 --------------------------------------------------------------------------------------------------
