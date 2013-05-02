@@ -167,9 +167,26 @@ AS SELECT *
 \end{lstlisting}
 \subsection{Tabellenstatistik}
 \begin{lstlisting}[style=sql]
-SELECT *
+SELECT segment_name, bytes, blocks, extents
+FROM user_segments;
+
+SELECT table_name, num_rows
 FROM user_tab_statistics;
 \end{lstlisting}
+Folgende Tabellenstatistik haben wir mit den oben genannten Querys erhoben.
+
+\begin{tabular}{l||r|r|r|r}
+  Tabelle & Anzahl Zeilen & Grösse in Bytes & Anzahl Blöcke & Anzahl Extents \\ \hline
+  \hline
+  CUSTOMERS & 150'000 & 29'360'128 & 3'584 & 43 \\ \hline
+  LINEITEMS & 6'001'215 & 897'581'056 & 109'568 & 178 \\ \hline
+  NATIONS & 25 & 65'536 & 8 & 1 \\ \hline
+  ORDERS & 1'500'000 & 201'326'592 & 24'576 & 95 \\ \hline
+  PARTS & 200'000 & 32'505'856 & 3'968 & 46 \\ \hline
+  PARTSUPPS & 800'000 & 142'606'336 & 17'408 & 88 \\ \hline
+  REGIONS & 5 & 65'536 & 8 & 1 \\ \hline
+  SUPPLIERS & 10'000 & 2'097'152 & 256 & 17 \\
+\end{tabular}	
 
 \section{Ausführungsplan}
 \begin{lstlisting}[style=sql]
@@ -189,13 +206,9 @@ FROM TABLE(DBMS_XPLAN.DISPLAY('plan_table',null,'serial'));
 ---------------------------------------------------------------------------
 \end{lstlisting}
 Die Tabelle zeigt die einzelnen Schritte des Ausführungsplanes, welche der 
-Optimizer erstellt hat, mit den jeweilig zurückgegebenen Zeilen, deren Grösse 
-und die Kosten für die Teilschritte. Die Kosten sind immer aufsummiert von 
-unten nach oben. Sie werden berechnet aus Disk I/O Zugriffen, CPU Belastung 
-und Hauptspeicher verbrauch. Der CPU Verbrauch wird immer gerundet, womit 
-wir die Differenzen nicht genau sehen.
-Man kann sich den Ausführungsplan als Baum vorstellen. Die Einrückungen 
-stellen die Knotentiefe dar.
+Optimizer erstellt hat, mit den jeweilig zurückgegebenen Anzahl Zeilen, deren 
+Grösse, die Kosten und Zeit für die Teilschritte. Man kann sich den 
+Ausführungsplan als Baum vorstellen. Die Einrückungen stellen die Knotentiefe dar.
 
 Für die nächsten Aufgaben verwenden wir das obenstehende Statement. Wir 
 haben jeweils das Query ausgetauscht um den Ausführungsplan zu erhalten.
@@ -508,9 +521,19 @@ customers zugegriffen und mit der Tabelle orders gejoint.
 
 \section{Versuch mit Index}
 \begin{lstlisting}[style=sql]
-SELECT *
-FROM user_ind_statistics;
+SELECT segment_name, bytes
+FROM user_segments;
 \end{lstlisting}
+
+
+\begin{tabular}{l||r|r|r}
+  Index & Grösse in Bytes & Tabellen Grösse in Bytes & Anteil von \\ 
+  & & &  Index an Tabelle \\ \hline
+  \hline
+  O\_ORDERKEY\_IX & 30'408'704 & 201'326'592 & 15.10\%  \\ \hline
+  O\_CLERK\_IX & 48'234'496 & 201'326'592 & 23.96\% \\ 
+\end{tabular}
+
 \subsection{Projektion}
 \begin{lstlisting}[style=sql]
 SELECT DISTINCT o_clerk
