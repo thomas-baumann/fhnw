@@ -105,7 +105,7 @@
 	\Large{Ausarbeitung 1: Anfrageverarbeitung}\\
 }
 \author{Thomas Baumann / Egemen Kaba}
-\date{01.05.2013}
+\date{04. Mai 2013}
 
 % hier beginnt das Dokument
 \begin{document}
@@ -128,10 +128,13 @@
 % Inhalt Start
 
 \section{Einleitung}
-\subsection{Sonderzächön}
-sind mägö cöäl! Hallo "Max" und "Moritz"!
+Die Ausarbeitung haben wir mit folgender Datenbankverbindung ausgeführt.
+
+\includegraphics{login_daten.png}
+
 \section{Vorbereitung}
 \subsection{Einrichten Datenbasis}
+Die Datenbank haben wir mit folgenden Querys eingerichtet.
 \begin{lstlisting}[style=sql]
 CREATE TABLE regions
 AS SELECT *
@@ -208,7 +211,9 @@ FROM TABLE(DBMS_XPLAN.DISPLAY('plan_table',null,'serial'));
 Die Tabelle zeigt die einzelnen Schritte des Ausführungsplanes, welche der 
 Optimizer erstellt hat, mit den jeweilig zurückgegebenen Anzahl Zeilen, deren 
 Grösse, die Kosten und Zeit für die Teilschritte. Man kann sich den 
-Ausführungsplan als Baum vorstellen. Die Einrückungen stellen die Knotentiefe dar.
+Ausführungsplan als Baum vorstellen. Die Einrückungen stellen die Knotentiefe 
+dar. Die Kosten für einen Elternknoten werden aus der Summe der Kosten der 
+Kindknoten plus die eigenen Kosten berechnet.
 
 Für die nächsten Aufgaben verwenden wir das obenstehende Statement. Wir 
 haben jeweils das Query ausgetauscht um den Ausführungsplan zu erhalten.
@@ -510,12 +515,14 @@ Predicate Information (identified by operation id):
    2 - filter("O_ORDERKEY"<100)
 \end{lstlisting}
 \textbf{Reflexion} \newline
-Der Optimizer wählt bei allen Varianten automatisch die Perfomanteste aus. Somit lautet die Antwort auf die Frage: Nein.
-Im Folgenden werden einige Gründe aufgeführt:
-Es wird ein Fremdschlüssel von orders und der Primärschlüssel von customers verglichen.
-Dadurch können in beiden Tabellen nicht benötigte Tuppel vorab herausgefiltert werden.
+Der Optimizer wählt bei allen Varianten automatisch die Perfomanteste aus. Somit kann man 
+sagen, dass die Rheinfolge in der WHERE Klausel keine Rolle spielt.
+
+Im Folgenden werden einige Gründe aufgeführt:\\
+Es wird ein Fremdschlüssel von orders und der Primärschlüssel von customers verglichen, 
+dadurch können in beiden Tabellen nicht benötigte Tupel vorab herausgefiltert werden.
 Dies hat den Vorteil, dass weniger Speicher und CPU für weitere Operationen benötigt werden.
-Danach werden die restlichen Tuppel der Tabelle orders mit der zweiten Bedingung herausgefiltert.
+Danach werden die restlichen Tupel der Tabelle orders mit der zweiten Bedingung herausgefiltert.
 Wenn nun die minimalst mögliche Anzahl Tuppel erreicht worden sind, wird auf die Tabelle
 customers zugegriffen und mit der Tabelle orders gejoint.
 
@@ -731,7 +738,6 @@ AND o_clerk BETWEEN 'Clerk#000000130' AND 'Clerk#000000139';
  
 Predicate Information (identified by operation id):
 ---------------------------------------------------
- 
    6 - access("O_ORDERKEY">=44444 AND "O_ORDERKEY"<=55555)
    9 - access("O_CLERK">='Clerk#000000130' AND "O_CLERK"<='Clerk#000000139')
 \end{lstlisting}
@@ -740,7 +746,6 @@ Dieser Ausführungsplan arbeitet sehr stark mit Bitmaps. Zuerst werden die Tuppe
 Anschliessend werden beide Bitmaps miteinander mit dem logischen Operator AND verknüpft. Das Ergebnis ist wiederum eine Bitmap, die jetzt beide Bedingungen der WHERE Klausel erfüllt. Die ROWIDs, wo die Bitmap den Wert {true} aufweist, werden nun durch die Hashfunktion ermittelt. Anschliessend wird mit diesen ROWIDs auf die Tabelle zugegriffen. \newline
 Als Nebenbemerkung: die Between-Klausel wird auch hier in zwei mathematische Funktionen umgewandelt.
 
-\subsection{Join}
 \subsection{Join}
 \begin{lstlisting}[style=sql]
 SELECT *
@@ -759,7 +764,6 @@ WHERE o_custkey = c_custkey;
  
 Predicate Information (identified by operation id):
 ---------------------------------------------------
- 
    1 - access("O_CUSTKEY"="C_CUSTKEY")
 \end{lstlisting}
 \textbf{Reflexion} \newline
@@ -785,7 +789,6 @@ AND o_orderkey < 100;
  
 Predicate Information (identified by operation id):
 ---------------------------------------------------
- 
    1 - access("O_CUSTKEY"="C_CUSTKEY")
    3 - access("O_ORDERKEY"<100)
 \end{lstlisting}
@@ -812,7 +815,6 @@ WHERE o_custkey = c_custkey;
  
 Predicate Information (identified by operation id):
 ---------------------------------------------------
- 
    1 - access("O_CUSTKEY"="C_CUSTKEY")
 \end{lstlisting}
 \textbf{Reflexion} \newline
@@ -841,7 +843,6 @@ WHERE o_custkey = c_custkey;
  
 Predicate Information (identified by operation id):
 ---------------------------------------------------
- 
    4 - access("O_CUSTKEY"="C_CUSTKEY")
 \end{lstlisting}
 \textbf{Reflexion} \newline
@@ -869,7 +870,6 @@ WHERE o_custkey = c_custkey;
  
 Predicate Information (identified by operation id):
 ---------------------------------------------------
- 
    4 - access("O_CUSTKEY"="C_CUSTKEY")
        filter("O_CUSTKEY"="C_CUSTKEY")
 \end{lstlisting}
@@ -879,6 +879,81 @@ Auch hier sind die Kosten höher als beim Hash Join.
 Der Grund dafür ist, dass zum einten die Tabellen für den Merge zuvor sortiert werden müssen.
 
 \section{Quiz}
+\begin{lstlisting}[style=sql]
+SELECT count(*)
+FROM parts, partsupps, lineitems
+WHERE p_partkey=ps_partkey
+AND ps_partkey=l_partkey
+AND ps_suppkey=l_suppkey
+AND ( (ps_partkey = 5 AND p_type = 'MEDIUM ANODIZED BRASS')
+OR (ps_partkey = 5 AND p_type = 'MEDIUM BRUSHED COPPER') );
+\end{lstlisting}
+\begin{lstlisting}[style=queryexecutionplan]
+----------------------------------------------------------------------------------
+| Id  | Operation            | Name      | Rows  | Bytes | Cost (%CPU)| Time     |
+----------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT     |           |     1 |    45 | 35577   (2)| 00:07:07 |
+|   1 |  SORT AGGREGATE      |           |     1 |    45 |            |          |
+|*  2 |   HASH JOIN          |           |     4 |   180 | 35577   (2)| 00:07:07 |
+|*  3 |    HASH JOIN         |           |     4 |   144 |  5872   (6)| 00:01:11 |
+|*  4 |     TABLE ACCESS FULL| PARTSUPPS |     4 |    36 |  4525   (1)| 00:00:55 |
+|*  5 |     TABLE ACCESS FULL| PARTS     |  2667 | 72009 |  1052   (1)| 00:00:13 |
+|   6 |    TABLE ACCESS FULL | LINEITEMS |  6001K|    51M| 29675   (1)| 00:05:57 |
+----------------------------------------------------------------------------------
+ 
+Predicate Information (identified by operation id):
+---------------------------------------------------
+   2 - access("PS_PARTKEY"="L_PARTKEY" AND "PS_SUPPKEY"="L_SUPPKEY")
+   3 - access("P_PARTKEY"="PS_PARTKEY")
+       filter("PS_PARTKEY"=5 AND "P_TYPE"='MEDIUM ANODIZED BRASS' OR 
+              "PS_PARTKEY"=5 AND "P_TYPE"='MEDIUM BRUSHED COPPER')
+   4 - filter("PS_PARTKEY"=5)
+   5 - filter("P_TYPE"='MEDIUM ANODIZED BRASS' OR "P_TYPE"='MEDIUM BRUSHED COPPER')
+\end{lstlisting}
+Wie aus dem Ausführungsplan ohne Indexes hervorgeht, werden 35577 Kosten verursacht. Diese 
+werden hauptsächlich durch einen Full Table Scan auf LINEITEMS verursacht.
+
+Wie haben danach verschieden indexes eingeführt und sind schliesslich auf folgendes Endergebnis gekommen:
+
+\begin{lstlisting}[style=sql]
+CREATE INDEX p_partkey_ix ON parts(p_partkey);
+CREATE INDEX ps_partkey_ix ON partsupps(ps_partkey);
+CREATE INDEX l_partkey_ix ON lineitems(l_partkey);
+CREATE INDEX ps_suppkey_ix ON partsupps(ps_suppkey);
+CREATE INDEX l_suppkey_ix ON lineitems(l_suppkey);
+CREATE INDEX p_type_ix ON parts(p_type);
+\end{lstlisting}
+\begin{lstlisting}[style=queryexecutionplanSmall]
+---------------------------------------------------------------------------------------------------
+| Id  | Operation                         | Name          | Rows  | Bytes | Cost (%CPU)| Time     |
+---------------------------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT                  |               |     1 |    45 |    52   (0)| 00:00:01 |
+|   1 |  SORT AGGREGATE                   |               |     1 |    45 |            |          |
+|   2 |   NESTED LOOPS                    |               |     4 |   180 |    52   (0)| 00:00:01 |
+|   3 |    NESTED LOOPS                   |               |     4 |   144 |    12   (0)| 00:00:01 |
+|   4 |     TABLE ACCESS BY INDEX ROWID   | PARTSUPPS     |     4 |    36 |     4   (0)| 00:00:01 |
+|*  5 |      INDEX RANGE SCAN             | PS_PARTKEY_IX |     4 |       |     3   (0)| 00:00:01 |
+|*  6 |     TABLE ACCESS BY INDEX ROWID   | PARTS         |     1 |    27 |     2   (0)| 00:00:01 |
+|*  7 |      INDEX RANGE SCAN             | P_PARTKEY_IX  |     1 |       |     1   (0)| 00:00:01 |
+|   8 |    BITMAP CONVERSION COUNT        |               |     1 |     9 |    52   (0)| 00:00:01 |
+|   9 |     BITMAP AND                    |               |       |       |            |          |
+|  10 |      BITMAP CONVERSION FROM ROWIDS|               |       |       |            |          |
+|* 11 |       INDEX RANGE SCAN            | L_PARTKEY_IX  |    30 |       |     2   (0)| 00:00:01 |
+|  12 |      BITMAP CONVERSION FROM ROWIDS|               |       |       |            |          |
+|* 13 |       INDEX RANGE SCAN            | L_SUPPKEY_IX  |    30 |       |     2   (0)| 00:00:01 |
+---------------------------------------------------------------------------------------------------
+ 
+Predicate Information (identified by operation id):
+---------------------------------------------------
+   5 - access("PS_PARTKEY"=5)
+   6 - filter(("P_TYPE"='MEDIUM ANODIZED BRASS' OR "P_TYPE"='MEDIUM BRUSHED COPPER') AND 
+              ("PS_PARTKEY"=5 AND "P_TYPE"='MEDIUM ANODIZED BRASS' OR "PS_PARTKEY"=5 AND 
+              "P_TYPE"='MEDIUM BRUSHED COPPER'))
+   7 - access("P_PARTKEY"="PS_PARTKEY")
+  11 - access("PS_PARTKEY"="L_PARTKEY")
+  13 - access("PS_SUPPKEY"="L_SUPPKEY")
+\end{lstlisting}
+
 
 \section{Deep Left Join}
 Verwendetes Statement, um ein initiales Deep Left Join zu erzeugen:
@@ -979,7 +1054,6 @@ Das Ergebnis bei Left Deep Join:
  
 Predicate Information (identified by operation id):
 ---------------------------------------------------
- 
    1 - access("PARTSUPPS"."PS_PARTKEY"="PARTS"."P_PARTKEY")
    3 - access("LINEITEMS"."L_SUPPKEY"="PARTSUPPS"."PS_SUPPKEY")
    5 - access("ORDERS"."O_ORDERKEY"="LINEITEMS"."L_ORDERKEY")
@@ -1004,7 +1078,6 @@ Das Ergebnis bei Bushy Tree:
  
 Predicate Information (identified by operation id):
 ---------------------------------------------------
- 
    1 - access("L_SUPPKEY"="PS_SUPPKEY")
    3 - access("PARTSUPPS"."PS_PARTKEY"="PARTS"."P_PARTKEY")
    7 - access("ORDERS"."O_ORDERKEY"="LINEITEMS"."L_ORDERKEY")
@@ -1070,7 +1143,6 @@ Mit Index
  
 Predicate Information (identified by operation id):
 ---------------------------------------------------
- 
    1 - access("ORDERS"."O_ORDERKEY"="LINEITEMS"."L_ORDERKEY")
    3 - access("LINEITEMS"."L_ORDERKEY"="PARTSUPPS"."PS_SUPPKEY")
    4 - access("PARTSUPPS"."PS_SUPPKEY"="PARTS"."P_PARTKEY")
@@ -1092,7 +1164,6 @@ Ohne Index
  
 Predicate Information (identified by operation id):
 ---------------------------------------------------
- 
    1 - access("ORDERS"."O_ORDERKEY"="LINEITEMS"."L_ORDERKEY")
    3 - access("LINEITEMS"."L_ORDERKEY"="PARTSUPPS"."PS_SUPPKEY")
    4 - access("PARTSUPPS"."PS_SUPPKEY"="PARTS"."P_PARTKEY")
@@ -1131,7 +1202,6 @@ Mit Index
  
 Predicate Information (identified by operation id):
 ---------------------------------------------------
- 
    1 - access("ORDERS"."O_ORDERKEY"="LINEITEMS"."L_ORDERKEY")
    3 - access("LINEITEMS"."L_ORDERKEY"="PARTSUPPS"."PS_SUPPKEY")
    4 - access("PARTSUPPS"."PS_SUPPKEY"="PARTS"."P_PARTKEY")
@@ -1154,7 +1224,6 @@ Ohne Index
  
 Predicate Information (identified by operation id):
 ---------------------------------------------------
- 
    1 - access("ORDERS"."O_ORDERKEY"="LINEITEMS"."L_ORDERKEY")
    3 - access("LINEITEMS"."L_ORDERKEY"="PARTSUPPS"."PS_SUPPKEY")
    4 - access("PARTSUPPS"."PS_SUPPKEY"="PARTS"."P_PARTKEY")
@@ -1168,7 +1237,7 @@ AND lineitems.l_orderkey = partsupps.ps_suppkey
 AND partsupps.ps_suppkey = parts.p_partkey;
 \end{lstlisting}
 Mit Index
-\begin{lstlisting}[style=queryexecutionplan]
+\begin{lstlisting}[style=queryexecutionplanSmall]
 -------------------------------------------------------------------------------------------------
 | Id  | Operation               | Name          | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |
 -------------------------------------------------------------------------------------------------
@@ -1184,7 +1253,6 @@ Mit Index
  
 Predicate Information (identified by operation id):
 ---------------------------------------------------
- 
    1 - access("ORDERS"."O_ORDERKEY"="LINEITEMS"."L_ORDERKEY")
    3 - access("LINEITEMS"."L_ORDERKEY"="PARTSUPPS"."PS_SUPPKEY")
    4 - access("PARTSUPPS"."PS_SUPPKEY"="PARTS"."P_PARTKEY")
@@ -1206,7 +1274,6 @@ Ohne Index
  
 Predicate Information (identified by operation id):
 ---------------------------------------------------
- 
    1 - access("ORDERS"."O_ORDERKEY"="LINEITEMS"."L_ORDERKEY")
    3 - access("LINEITEMS"."L_ORDERKEY"="PARTSUPPS"."PS_SUPPKEY")
    4 - access("PARTSUPPS"."PS_SUPPKEY"="PARTS"."P_PARTKEY")
@@ -1246,7 +1313,6 @@ Mit Index
  
 Predicate Information (identified by operation id):
 ---------------------------------------------------
- 
    1 - access("ORDERS"."O_ORDERKEY"="LINEITEMS"."L_ORDERKEY")
    3 - access("LINEITEMS"."L_ORDERKEY"="PARTSUPPS"."PS_SUPPKEY")
    4 - access("PARTSUPPS"."PS_SUPPKEY"="PARTS"."P_PARTKEY")
@@ -1268,7 +1334,6 @@ Ohne Index
  
 Predicate Information (identified by operation id):
 ---------------------------------------------------
- 
    1 - access("ORDERS"."O_ORDERKEY"="LINEITEMS"."L_ORDERKEY")
    3 - access("LINEITEMS"."L_ORDERKEY"="PARTSUPPS"."PS_SUPPKEY")
    4 - access("PARTSUPPS"."PS_SUPPKEY"="PARTS"."P_PARTKEY")
@@ -1277,7 +1342,90 @@ Predicate Information (identified by operation id):
 Bei Bushy Trees werden Indizes ignoriert. Einzig bei einem Left Deep Join gelang es, durch Indizes einen Performance-Zuwachs zu erreichen.
 Bei diesem Versuch wurde darauf geachtet, dass die Spalte, über die auf der linken Seite gejoint wurde, beim nächsten Join wieder verwendet wurde.
 
-\section{Eigene SQL-Anfragen}
+\section{Eigene SQL-Anfrage}
+Wir haben zwei neue Tabellen gemäss folgenden Angaben erstellt.
+\begin{lstlisting}[style=sql]
+CREATE TABLE test1
+AS SELECT *
+FROM DBARC00.orders;
+
+CREATE TABLE test2
+AS SELECT *
+FROM DBARC00.orders;
+\end{lstlisting}
+Nun haben wir eine eigene SQL-Anfrage mit diesen zwei Tabellen erstellt.
+\begin{lstlisting}[style=sql]
+SELECT *
+FROM test1 t1, test2 t2
+WHERE t1.o_orderkey = t2.o_orderkey
+AND t1.o_orderkey BETWEEN 2345 AND 2543
+ORDER BY t1.o_orderkey;
+\end{lstlisting}
+\begin{lstlisting}[style=queryexecutionplan]
+-----------------------------------------------------------------------------
+| Id  | Operation           | Name  | Rows  | Bytes | Cost (%CPU)| Time     |
+-----------------------------------------------------------------------------
+|   0 | SELECT STATEMENT    |       |   266 | 73948 | 13200   (1)| 00:02:39 |
+|   1 |  SORT ORDER BY      |       |   266 | 73948 | 13200   (1)| 00:02:39 |
+|*  2 |   HASH JOIN         |       |   266 | 73948 | 13199   (1)| 00:02:39 |
+|*  3 |    TABLE ACCESS FULL| TEST2 |   267 | 37113 |  6599   (1)| 00:01:20 |
+|*  4 |    TABLE ACCESS FULL| TEST1 |   267 | 37113 |  6600   (1)| 00:01:20 |
+-----------------------------------------------------------------------------
+ 
+Predicate Information (identified by operation id):
+---------------------------------------------------
+   2 - access("T1"."O_ORDERKEY"="T2"."O_ORDERKEY")
+   3 - filter("T2"."O_ORDERKEY">=2345 AND "T2"."O_ORDERKEY"<=2543)
+   4 - filter("T1"."O_ORDERKEY">=2345 AND "T1"."O_ORDERKEY"<=2543)
+\end{lstlisting}
+Da auf den Tabellen kein Index besteht, muss ein Full Tale Scan durchgeführt werden, 
+was die hohen Kosten verursachen. Sowohl das joinen, sortieren wie auch das projezieren 
+verursachen wenig kosten, da das Resultat nur auf wenige Anzahl Zeilen geschätzt wird.
+
+Als Gegenmassnahme haben wir zwei Indexes erstellt, jeweils auf die Spalte, auf 
+die wir selektieren. 
+\begin{lstlisting}[style=sql]
+CREATE INDEX test1_oorderkey_idx ON test1(o_orderkey);
+CREATE INDEX test2_oorderkey_idx ON test2(o_orderkey);
+\end{lstlisting}
+\begin{lstlisting}[style=queryexecutionplanSmall]
+-----------------------------------------------------------------------------------------------------
+| Id  | Operation                     | Name                | Rows  | Bytes | Cost (%CPU)| Time     |
+-----------------------------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT              |                     |    48 | 13344 |    11  (10)| 00:00:01 |
+|   1 |  MERGE JOIN                   |                     |    48 | 13344 |    11  (10)| 00:00:01 |
+|   2 |   TABLE ACCESS BY INDEX ROWID | TEST1               |    48 |  6672 |     5   (0)| 00:00:01 |
+|*  3 |    INDEX RANGE SCAN           | TEST1_OORDERKEY_IDX |    48 |       |     3   (0)| 00:00:01 |
+|*  4 |   SORT JOIN                   |                     |    48 |  6672 |     6  (17)| 00:00:01 |
+|   5 |    TABLE ACCESS BY INDEX ROWID| TEST2               |    48 |  6672 |     5   (0)| 00:00:01 |
+|*  6 |     INDEX RANGE SCAN          | TEST2_OORDERKEY_IDX |    48 |       |     3   (0)| 00:00:01 |
+-----------------------------------------------------------------------------------------------------
+ 
+Predicate Information (identified by operation id):
+---------------------------------------------------
+   3 - access("T1"."O_ORDERKEY">=2345 AND "T1"."O_ORDERKEY"<=2543)
+   4 - access("T1"."O_ORDERKEY"="T2"."O_ORDERKEY")
+       filter("T1"."O_ORDERKEY"="T2"."O_ORDERKEY")
+   6 - access("T2"."O_ORDERKEY">=2345 AND "T2"."O_ORDERKEY"<=2543)
+\end{lstlisting}
+Durch die Indexes werden zwei Index Range Scan durchgeführt, welche viel weniger Kosten verursachen. 
+Auch im Vergleich zur ersten Variante, wird nur eine Tabelle sortiert und nachher erst gejoint. 
+Schlussendlich wird wird die Projektion ausgeführt.
+
+Dies für zu einer Kostenersparnis vom Faktor 1200.
+
+\section{Reflexion}
+Wir hatten zuerst Probleme uns auf dem DB-Server anzumelden, da wir unser Passwort nicht wussten. So 
+probierten wir die uns bekannten Passwörter aus, was schliesslich dazu führte, dass unser Benutzername
+gesperrt wurde, da zu viele Anfragen durchgeführt wurden. Da wir auch keinen SSH-Zugriff auf diesen 
+Server haben, beauftragten wir eine andere Gruppe damit unser Konto zu aktivieren.
+\begin{lstlisting}[style=sql]
+ALTER USER dbarc01 ACCOUNT UNLOCK;
+\end{lstlisting}
+Sie konnten dies jedoch nicht vornehmen, da unsere Benutzer zu wenig Rechte haben. Schlussendlich 
+haben wir dem Dozenten Herrn Wyss geschrieben, dass er uns freischalten könnte. Damit wir trotzdem 
+arbeiten konnten, bis wir Antwort vom Dozenten erhielten, durften wir den Account der Gruppe dbarc03 
+verwenden.
 
 % Inhalt Ende 
 \end{document} 
