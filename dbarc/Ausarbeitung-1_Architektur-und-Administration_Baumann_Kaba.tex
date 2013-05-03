@@ -1432,6 +1432,10 @@ Schlussendlich wird die Projektion ausgeführt.
 Dies für zu einer Kostenersparnis vom Faktor 1200.
 
 \section{Reflexion}
+\subsection{Allgemein}
+Über die ganze Ausarbeitung hinweg konnten wir uns mit SQL-Queries und Ausführungsplänen vertieft auseinandersetzen.
+Dabei haben wir gelernt, wie der Optimizer mithilfe von Hints und Indizes sowohl positiv als auch negativ beeinflusst werden kann.
+\subsection{Anmeldung}
 Wir hatten zuerst Probleme uns auf dem DB-Server anzumelden, da wir unser Passwort nicht wussten. So 
 probierten wir die uns bekannten Passwörter aus, was schliesslich dazu führte, dass unser Account
 gesperrt wurde, da zu viele Anmeldeanfragen durchgeführt wurden. Da wir auch keinen SSH-Zugriff auf diesen 
@@ -1444,6 +1448,9 @@ haben wir dem Dozenten, Herr Wyss, geschrieben, dass er uns freischalten könnte
 arbeiten konnten, bis wir eine Antwort vom Dozenten erhielten, durften wir den Account der Gruppe dbarc03 
 verwenden.
 
+\subsection{Indizes}
+Durch die Anwendung von Indizes in der Praxis konnten wir feststellen, dass Indizes beim Vergleich von zwei Spalten keinen
+Performance-Zuwachs bringen. Wir haben weiter festgestellt, dass Indizes Sinn machen, wenn z.B. ein Range über das Statement "BETWEEN ... AND ..." abgefragt wird.
 
 % Inhalt Ende 
 \end{document} 
