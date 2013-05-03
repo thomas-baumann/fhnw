@@ -177,7 +177,6 @@ SELECT table_name, num_rows
 FROM user_tab_statistics;
 \end{lstlisting}
 Folgende Tabellenstatistik haben wir mit den oben genannten Querys erhoben.
-
 \begin{tabular}{l||r|r|r|r}
   Tabelle & Anzahl Zeilen & Grösse in Bytes & Anzahl Blöcke & Anzahl Extents \\ \hline
   \hline
@@ -190,7 +189,8 @@ Folgende Tabellenstatistik haben wir mit den oben genannten Querys erhoben.
   REGIONS & 5 & 65'536 & 8 & 1 \\ \hline
   SUPPLIERS & 10'000 & 2'097'152 & 256 & 17 \\
 \end{tabular}	
-
+Je nachdem, wo man die Werte ausliest, erhält man andere Werte für die Grösse und 
+Anzahl Blöcke.
 \section{Ausführungsplan}
 \begin{lstlisting}[style=sql]
 EXPLAIN PLAN FOR
@@ -233,10 +233,9 @@ FROM orders;
 ---------------------------------------------------------------------------- 
 \end{lstlisting}   
 \textbf{Reflexion} \newline
-Da alle Zeilen und Spalten der Tabelle ausgelesen werden müssen wird hier ein
-Full Table Scan durchgeführt. Aus der Statistik geht hervor, dass diese Tabelle
-1579K Zeilen umfasst, 209MB gross ist und ein Full Table Scan 6612 CPU-Indexpunkte
-beansprucht.
+Da alle Zeilen und Spalten der Tabelle ausgelesen werden müssen, wird hier ein
+Full Table Scan durchgeführt. Da alle Spalten verwendet werden, muss keine Projektion 
+vorgenommen werden.
 
 \begin{lstlisting}[style=sql]
 SELECT o_clerk
@@ -255,8 +254,6 @@ Es werden wiederum alle Zeile, jedoch nicht alle Spalten ausgelesen.
 Exakt läuft es so ab, dass zuerst die ganze Tabelle gelesen wird und danach die nicht
 benötigten Spalten herausgefiltert werden.
 Das verringert die Anzahl Daten, die gespeichert werden müssen, drastisch von 209MB auf 25MB.
-Zudem ist die benötigte CPU-Leistung minimal weniger, aufgrund der Reduktion des
-zu verwaltenden Speichers.
 
 \begin{lstlisting}[style=sql]
 SELECT DISTINCT o_clerk
@@ -274,9 +271,8 @@ FROM orders;
 \textbf{Reflexion} \newline
 Wie beim vorherigen Befehl werden alle Zeilen einer bestimmten Spalte ausgelesen,
 was wiederum einen Zugriff auf die gesamte Tabelle nötig macht.
-Zusätzlich zu diesem Aufwand müssen vorangehend alle doppelten Einträge herausgefiltert werden,
-was die massiv angestiegenen CPU-Kosten bei Id 0 und 1 erklärt.
-Die zusätzliche Operation mit der Id 1 dient dazu, die doppelten Werte herauszufiltern.
+Zusätzlich zu diesem Aufwand müssen alle doppelten Einträge herausgefiltert werden,
+was die massiv angestiegenen CPU-Kosten bei Operation 1 erklärt.
 Für die Speicherung von Zwischenresultaten wird dabei temporärer Speicher beansprucht.
 
 \subsection{Selektion}
@@ -299,7 +295,7 @@ Predicate Information (identified by operation id):
 \end{lstlisting}
 \textbf{Reflexion} \newline
 Es soll nur ein Tupel ausgewählt werden (Spalte ist Primary Key), da jedoch 
-kein index besteht, ist nicht bekannt, wo der Eintrag liegt und zusätzlich 
+kein index besteht, ist nicht bekannt, welches der Eintrag ist und zusätzlich 
 kann nach dem ersten Fund nicht abgebrochen werden. Deshalb muss wieder ein 
 Full Table Scan durchgeführt werden. Durch die Bedingung wird viel weniger 
 Hauptspeicher benötigt.
@@ -344,7 +340,7 @@ Predicate Information (identified by operation id):
 \end{lstlisting}
 \textbf{Reflexion} \newline
 Durch die AND-verknüpfung muss die zweite Bedingung nur überprüft werden, wenn 
-die Erste erfüllt ist. So sind alle Werte, ausser die Zeit gesunken.
+die Erste erfüllt ist. So sind alle Werte, ausser der Zeit gesunken.
 
 \begin{lstlisting}[style=sql]
 SELECT *
@@ -401,8 +397,8 @@ column >= x AND column <= y
 \end{lstlisting}
 ersetzt. Im Vergleich zum Vorherigen, sind die Anzahl Zeilen und die 
 Speicherbenutzung gestiegen, dies weil mehr Tupel selektiert werden. Hingegen 
-sind die Kosten gesunken, dies ist aus unserer Sicht dadurch zu Begründen, da 
-bei beiden Vergleichen, die gleiche Spalte verwendet wird.
+sind die Kosten minimal gesunken, da die beiden Vergleiche auf der gleichen 
+Spalte vorgenommen werden.
 
 \begin{lstlisting}[style=sql]
 SELECT *
@@ -424,9 +420,10 @@ Predicate Information (identified by operation id):
               "O_CLERK">='Clerk#000000130' AND "O_CLERK"<='Clerk#000000139')
 \end{lstlisting}
 \textbf{Reflexion} \newline
-Auch hier wurden die BETWEEN wieder mit grösser gleich und kleiner gleich ersetzt. 
-Die Resultierende Anzahl Tupel und der benötigte Speicher sind nochmals gesunken. 
-Wohin gegen die Kosten gestiegen sind, da bis zu vier Vergleiche notwendig sind.
+Auch hier wurden die BETWEEN-Statements mit grösser gleich und kleiner gleich 
+ersetzt. Die Resultierende Anzahl Tupel und der benötigte Speicher sind nochmals 
+gesunken. Wohin gegen die Kosten gestiegen sind, da bis zu vier Vergleiche 
+notwendig sind.
 
 \subsection{Join}
 \begin{lstlisting}[style=sql]
@@ -518,20 +515,24 @@ Predicate Information (identified by operation id):
 Der Optimizer wählt bei allen Varianten automatisch die Perfomanteste aus. Somit kann man 
 sagen, dass die Rheinfolge in der WHERE Klausel keine Rolle spielt.
 
-Im Folgenden werden einige Gründe aufgeführt:\\
-Es wird ein Fremdschlüssel von orders und der Primärschlüssel von customers verglichen, 
-dadurch können in beiden Tabellen nicht benötigte Tupel vorab herausgefiltert werden.
-Dies hat den Vorteil, dass weniger Speicher und CPU für weitere Operationen benötigt werden.
-Danach werden die restlichen Tupel der Tabelle orders mit der zweiten Bedingung herausgefiltert.
-Wenn nun die minimalst mögliche Anzahl Tuppel erreicht worden sind, wird auf die Tabelle
-customers zugegriffen und mit der Tabelle orders gejoint.
+Es wird immer ein Full Table Scan auf die Tabelle orders mit der Selektion id=2 
+vorgenommen, somit sind nur die benötigten Datensätze im Resultat. Das Resultat wird mit 
+einem Hash Join mit der customers Tabelle vereinigt, welche mit einem Full Table Scan 
+gelesen wurde. Da auf der Tabelle orders eine Selektion vorgenommen wird, wird diese 
+Tabelle immer auf die Linke Seite des Joins genommen.
 
 \section{Versuche mit Index}
+Mit folgenden Befehlen wurden die Indizes erstellt.
+\begin{lstlisting}[style=sql]
+CREATE INDEX o_orderkey_ix ON orders(o_orderkey);
+CREATE INDEX o_clerk_ix ON orders(o_clerk);
+\end{lstlisting}
+
+Mit folgendem Befehl wurden die Statistiken für die Indizes erhoben.
 \begin{lstlisting}[style=sql]
 SELECT segment_name, bytes
 FROM user_segments;
 \end{lstlisting}
-
 
 \begin{tabular}{l||r|r|r}
   Index & Grösse in Bytes & Tabellen Grösse in Bytes & Anteil von \\ 
@@ -556,7 +557,11 @@ FROM orders;
 ------------------------------------------------------------------------------------
 \end{lstlisting}
 \textbf{Reflexion} \newline
-Statt dem Full Table Access wird jetzt ein Index Range Scan angewendet. Dadurch können die benötigten Einträge wesentlich schneller gefunden werden. Konkret werden im Vergleich zum Versuch ohne Index über weniger Reihen iteriert, weniger Platz im Memory sowie kein temporärer Speicher mehr benötigt, weniger CPU beansprucht und das Query wird deutlich schneller abgearbeitet.
+Statt dem Full Table Scan wird jetzt ein Index Range Scan angewendet. Dadurch können 
+die benötigten Tupel wesentlich schneller gefunden werden. Im Vergleich ohne Index 
+werden nur minimal weniger Tupel ausgelesen, jedoch viel schneller. Hingegen der 
+Hash Unique wird massiv schneller durchgearbeitet und liefert auch weniger Tupel zurück.
+Bei beiden Projektionen beanspruchen keine Kosten.
 
 \subsection{Selektion}
 \begin{lstlisting}[style=sql]
@@ -578,7 +583,9 @@ Predicate Information (identified by operation id):
    2 - access("O_ORDERKEY"=44444)
 \end{lstlisting}
 \textbf{Reflexion} \newline
-Hier wird selektiv mittels eines Index Range Scan gesucht. Es liefert die Position auf der Disk mittels der ROWID. Anhand dieser ROWID wird wiederum direkt auf die Tabelle zugegriffen.
+Hier wird selektiv mittels eines Index Range Scans gesucht. Es liefert die Position auf 
+der Disk mittels der ROWID. Anhand dieser ROWID wird wiederum direkt auf die Tabelle 
+zugegriffen.
 
 \begin{lstlisting}[style=sql]
 SELECT /*+ FULL(orders) */ *
@@ -598,7 +605,7 @@ Predicate Information (identified by operation id):
    1 - filter("O_ORDERKEY"=44444)
 \end{lstlisting}
 \textbf{Reflexion} \newline
-Der Hint erzwingt einen Full Table Access, was zu einen massiven Anstieg des Ressourcenverbrauchs führt.
+Der Hint erzwingt einen Full Table Scan, was zu einen massiven Anstieg des Ressourcenverbrauchs führt.\\
 Der Index wird dabei nicht benutzt.
 
 \begin{lstlisting}[style=sql]
@@ -626,7 +633,7 @@ Predicate Information (identified by operation id):
    7 - access("O_ORDERKEY"=44444)
 \end{lstlisting}
 \textbf{Reflexion} \newline
-Durch den Zugriff auf Indizes wird auch hier direkt auf die benötigten Tuppel zugegriffen.
+Durch den Zugriff auf Indizes wird auch hier direkt auf die benötigten Tupel zugegriffen.
 Statt einer werden zwei Indizes verwendet, da die OR-Verknüpfung den Zugriff auf zwei indexierte Spalten verlangt.
 
 \begin{lstlisting}[style=sql]
@@ -649,7 +656,8 @@ Predicate Information (identified by operation id):
    2 - access("O_ORDERKEY"=44444)
 \end{lstlisting}
 \textbf{Reflexion} \newline
-Bevor hier der Index Range Scan auf die Spalte orderkey angewendet wird, werden die Einträge nach der Spalte clerk gefiltert. Dies geschieht deswegen, weil ein Tuppel Kriterien in zwei Spalten erfüllen muss.
+Da ein Index auf o\_orderkey besteht, werden direkt nur die benötigten Tupel ausgelesen. Was so 
+gut wie keine Kosten verursacht und Zeit benötigt.
 
 \begin{lstlisting}[style=sql]
 SELECT *
@@ -671,6 +679,8 @@ Predicate Information (identified by operation id):
    2 - access("O_CLERK"='Clerk#000000286')
 \end{lstlisting}
 \textbf{Reflexion} \newline
+Im Vergleich zum vorherigen Ausführungsplan sind die beiden Selektionen vertauscht. Dies kommt zustande, 
+da o\_orderkey*2 erst nachher berechnet wird.
 
 \begin{lstlisting}[style=sql]
 SELECT *
@@ -691,7 +701,7 @@ Predicate Information (identified by operation id):
    2 - access("O_ORDERKEY">=111111 AND "O_ORDERKEY"<=222222)
 \end{lstlisting}
 \textbf{Reflexion} \newline
-Der Optimizer wandelt den BETWEEN-Befehl in zwei mathematische Operationen um.
+Der Optimizer wandelt den BETWEEN-Befehl in zwei mathematische Operationen um.\\
 Hier wird der Index Range Scan ausgeführt, weil der Range klein genug gewählt wurde, dass sich die Anzahl IO-Zugriffe noch lohnt.
 
 \begin{lstlisting}[style=sql]
@@ -712,7 +722,7 @@ Predicate Information (identified by operation id):
    1 - filter("O_ORDERKEY">=111111 AND "O_ORDERKEY"<=222222123)
 \end{lstlisting}
 \textbf{Reflexion} \newline
-Hier wurde nun ein Full Table Scan ausgeführt, weil der Range gross genug gewählt wurde, dass es wegen der vielen IO-Zugriffe nicht mehr lohnt.
+Hier wird nun ein Full Table Scan ausgeführt, da der Range zu gross ist. Ein Index Range Scan würde zu viele IO-Zugriffe verursachen.
 
 \begin{lstlisting}[style=sql]
 SELECT *
@@ -741,10 +751,9 @@ Predicate Information (identified by operation id):
    6 - access("O_ORDERKEY">=44444 AND "O_ORDERKEY"<=55555)
    9 - access("O_CLERK">='Clerk#000000130' AND "O_CLERK"<='Clerk#000000139')
 \end{lstlisting}
-\textbf{Reflexion} \newline
-Dieser Ausführungsplan arbeitet sehr stark mit Bitmaps. Zuerst werden die Tuppel der Tabelle orders seperat nach den beiden Bedingungen der WHERE Klausel mit Hilfe des Indizes analysiert. Das Ergebnis {true, false} wird dabei sortiert in einer Bitmap für jede ROWID abgebildet.
-Anschliessend werden beide Bitmaps miteinander mit dem logischen Operator AND verknüpft. Das Ergebnis ist wiederum eine Bitmap, die jetzt beide Bedingungen der WHERE Klausel erfüllt. Die ROWIDs, wo die Bitmap den Wert {true} aufweist, werden nun durch die Hashfunktion ermittelt. Anschliessend wird mit diesen ROWIDs auf die Tabelle zugegriffen. \newline
-Als Nebenbemerkung: die Between-Klausel wird auch hier in zwei mathematische Funktionen umgewandelt.
+\textbf{Reflexion} \\
+Hier wurden die Between-Klausel auch in zwei mathematische Funktionen umgewandelt.\\
+Durch die Indizes werden Bitmaps verwendet, was zu ein schneller Ausführung führt.
 
 \subsection{Join}
 \begin{lstlisting}[style=sql]
@@ -767,8 +776,9 @@ Predicate Information (identified by operation id):
    1 - access("O_CUSTKEY"="C_CUSTKEY")
 \end{lstlisting}
 \textbf{Reflexion} \newline
-In diesem einfachen Statement werden beide Tabellen nach der Bedingung gefiltert.
-Das Ergebnis wird anschliessend gejoined. Dabei steht die kleinere der beiden Tabellen, customers, auf der linken Seite der Funktion, da daraus evtl. weniger Einträge als Ergebnis entstehen als bei der Tabelle orders. Dadurch werden Ressourcen gespart.
+Auf die Tabellen wird mit einem Full Table Scan zugegriffen. In der Hash Join Funktion werden 
+die beiden Tabellen vereint, wobei die kleinere Tabelle auf der linken Seite ist. Dabei wird vom Wert der 
+ersten Tabelle ein Hash erzeugt und der zugehörige Wert wird in der grossen Tabelle gesucht.
 
 \begin{lstlisting}[style=sql]
 SELECT *
@@ -793,12 +803,15 @@ Predicate Information (identified by operation id):
    3 - access("O_ORDERKEY"<100)
 \end{lstlisting}
 \textbf{Reflexion} \newline
-In diesem Statement steht nun das Ergebnis aus der Filterung der Tabelle orders links von der Hash-Join-Funktion.
-Dies liegt daran, dass auf orders eine weitere Bedingung angewendet werden kann, die die Anzahl zu iterierender Reihen weiter einschränkt. Begünstigend ist ebenfalls die Tatsache, dass diese Bedingung mittel eines Index Range Scans geprüft werden kann.
-Nach der Filterung sind weniger Einträge vorhanden, als in der Tabelle customers.
+Im Vergleich zum vorherigen Query wird eine zusätzliche Selektion verwendet. Dies führt dazu, dass die 
+Tabelle orders zuerst mit einem Index Range Scan auf die gewünschten Tupel durchsucht wird. Dadurch ist 
+diese Tabelle kleiner als die andere und rückt auf die Linke Seite der Hash Join Funktion.
 
+Es wird ein neuer Index eingefügt:
 \begin{lstlisting}[style=sql]
 CREATE INDEX c_custkey_ix ON customer(c_custkey);
+\end{lstlisting}
+\begin{lstlisting}[style=sql]
 SELECT *
 FROM orders, customers
 WHERE o_custkey = c_custkey;
@@ -818,11 +831,12 @@ Predicate Information (identified by operation id):
    1 - access("O_CUSTKEY"="C_CUSTKEY")
 \end{lstlisting}
 \textbf{Reflexion} \newline
-Auf die Tabelle wird ein Full Table Scan aufgeführt, da sie klein genug ist, dass es aus Sicht des Optimizers nicht lohnt einen Index Range Scan durchzuführen.
-Zudem müsste sowieso jeder Tuppel auf die Bedingung überprüft werden. \newline
-\newline
+Auf die Tabelle wird ein Full Table Scan aufgeführt, da es aus Sicht des Optimizers nicht 
+lohnt einen Index Range Scan durchzuführen. Zudem müsste sowieso jeder Tupel auf die Bedingung 
+überprüft werden. 
+
 Im Folgenden wird mittels Hint angegeben, dass ein Nested Loop angewendet werden soll.\newline
-Zudem wird exemplarisch, dass Basisbeispiel der vorherigen Übungen von Kapitel 5.3 verwendet.\newline
+Zudem wird exemplarisch das Basisbeispiel der vorherigen Übungen von Kapitel 5.3 verwendet.\newline
 
 \begin{lstlisting}[style=sql]
 SELECT /*+ USE_NL (orders customers) */*
@@ -847,10 +861,10 @@ Predicate Information (identified by operation id):
 \end{lstlisting}
 \textbf{Reflexion} \newline
 Der Ausführungsplan zeigt auf, dass hier die Anwendung von Nested Loops Ressourcentechnisch unsinnig ist.
-Der Grund liegt darin, dass hier über jedes einzelne Tuppel iteriert werden muss, was nicht nötig wäre. \newline
-\newline
-Im Folgenden wird mittels Hint angegeben, dass kein Hash Join angewendet werden soll.\newline
-Zudem wird exemplarisch, dass Basisbeispiel der vorherigen Übungen von Kapitel 5.3 verwendet.
+Der Grund liegt darin, dass hier über jedes einzelne Tupel iteriert werden muss, was nicht nötig wäre.
+
+Im Folgenden wird mittels Hint angegeben, dass kein Hash Join angewendet werden soll.\\
+Zudem wird exemplarisch das Basisbeispiel der vorherigen Übung von Kapitel 5.3 verwendet.
 \begin{lstlisting}[style=sql]
 SELECT /*+ NO_USE_HASH (orders customers) */*
 FROM orders, customers
@@ -910,7 +924,7 @@ Predicate Information (identified by operation id):
    4 - filter("PS_PARTKEY"=5)
    5 - filter("P_TYPE"='MEDIUM ANODIZED BRASS' OR "P_TYPE"='MEDIUM BRUSHED COPPER')
 \end{lstlisting}
-Wie aus dem Ausführungsplan ohne Indexes hervorgeht, werden 35577 Kosten verursacht. Diese 
+Wie aus dem Ausführungsplan ohne Indexes hervorgeht, werden 35'577 Kosten verursacht. Diese 
 werden hauptsächlich durch einen Full Table Scan auf LINEITEMS verursacht.
 
 Wie haben danach verschieden indexes eingeführt und sind schliesslich auf folgendes Endergebnis gekommen:
@@ -953,7 +967,9 @@ Predicate Information (identified by operation id):
   11 - access("PS_PARTKEY"="L_PARTKEY")
   13 - access("PS_SUPPKEY"="L_SUPPKEY")
 \end{lstlisting}
-
+Durch die Erstellung der Indizes werden keine Full Table Scans, sondern Index Range Scans 
+durchgeführt. Als Hilfskonstruktion werden Bitmaps und Nested Loops verwendet. Dies führt zu
+Gesamtkosten von 52, was zu einer Kostenersparnis von Faktor 685 führt.
 
 \section{Deep Left Join}
 Verwendetes Statement, um ein initiales Deep Left Join zu erzeugen:
@@ -984,20 +1000,21 @@ Predicate Information (identified by operation id):
    3 - access("LINEITEMS"."L_SUPPKEY"="PARTSUPPS"."PS_SUPPKEY")
    5 - access("ORDERS"."O_ORDERKEY"="LINEITEMS"."L_ORDERKEY")
 \end{lstlisting}
+\textbf{Reflexion} \newline
+Im ersten Statement sieht man gut, dass ein Deep Left Join erzeugt wird.\\
+Die Kosten sind dementsprechend extrem hoch. Diese Kosten werden vor allem durch Joins von Tabellen mit bereits gejointen Tabellen verursacht.
+
 Modifiziertes Statement, um ein Bushy Tree zu erzeugen:
 \begin{lstlisting}[style=sql]
 SELECT  *
-FROM 
-(
-SELECT /*+ no_merge */ *
-FROM orders, lineitems
-WHERE orders.o_orderkey = lineitems.l_orderkey
-)
-,
-(
-SELECT /*+ no_merge */ *
-FROM partsupps, parts
-WHERE partsupps.ps_partkey = parts.p_partkey
+FROM (
+  SELECT /*+ no_merge */ *
+  FROM orders, lineitems
+  WHERE orders.o_orderkey = lineitems.l_orderkey
+), (
+  SELECT /*+ no_merge */ *
+  FROM partsupps, parts
+  WHERE partsupps.ps_partkey = parts.p_partkey
 )
 WHERE l_suppkey = ps_suppkey;
 \end{lstlisting}
@@ -1024,10 +1041,8 @@ Predicate Information (identified by operation id):
    7 - access("ORDERS"."O_ORDERKEY"="LINEITEMS"."L_ORDERKEY")
 \end{lstlisting}
 \textbf{Reflexion} \newline
-Im ersten Statement sieht man gut, dass ein Deep Left Join erzeugt wird.
-Die Kosten sind jedoch extrem hoch. Diese Kosten werden vor allem durch Joins von Tabellen mit bereits gejointen Tabellen verursacht.\newline
-Im zweiten Statement wird nun durch Umformulierung und Einfügen von Hints explizit angegeben, in welcher Reihenfolge die Tabellen gejoined und dass diese nicht gemerged werden sollen. Im Ausführungsplan sieht man sehr gut, dass zuerst zwei Views mit jeweils zwei gejointen Tabellen erstellt wird. Anschliessend werden diese beiden View gejoint, was schlussendlich zu einem Bushy-Tree führt. Ebenfalls sind die Kosten massiv gesunken. Konkret um knapp einem Faktor von 40!\newline
-\newline
+Im zweiten Statement wird nun durch Umformulierung und Einfügen von Hints explizit angegeben, in welcher Reihenfolge die Tabellen gejoined und dass diese nicht gemerged werden sollen. Im Ausführungsplan sieht man sehr gut, dass zuerst zwei Views mit jeweils zwei gejointen Tabellen erstellt werden. Anschliessend werden diese beiden Views gejoint, was schlussendlich zu einem Bushy-Tree führt. Ebenfalls sind die Kosten massiv gesunken, fast um einem Faktor von 40.
+
 Folgende Indizes wurden nun erstellt, um die Anfragen schneller durchlaufen zu lassen:
 \begin{lstlisting}[style=sql]
 CREATE INDEX o_orderkey_ix ON orders(o_orderkey);
@@ -1083,9 +1098,11 @@ Predicate Information (identified by operation id):
    7 - access("ORDERS"."O_ORDERKEY"="LINEITEMS"."L_ORDERKEY")
 \end{lstlisting}
 \textbf{Reflexion} \newline
-Der Optimizer hatte sowohl bei Left Deep Join als auch beim Bushy Tree die Benutzung von Indizes blockiert.
-Somit konnte auch kein Performance-Zuwachs feststellen. \newline
-Mit den folgenden Statements wurde versucht, einen Fast Full Index-Scan zu erzwingen. Jedoch wurde das vom Optimizer ebenfalls inoriert.\newline
+Der Optimizer hatte sowohl bei Left Deep Join, als auch beim Bushy Tree keine Indizes verwendet.
+Somit konnte auch kein Performance-Zuwachs feststellt werden.
+
+Mit den folgenden Statements wurde versucht, einen Fast Full Index-Scan zu erzwingen. Jedoch wurde das vom Optimizer ebenfalls ignoriert.
+
 Left Deep Join mit Hint
 \begin{lstlisting}[style=sql]
 SELECT /*+ 
@@ -1118,7 +1135,7 @@ WHERE partsupps.ps_partkey = parts.p_partkey
 WHERE l_suppkey = ps_suppkey;
 \end{lstlisting}
 
-Folgend wurden einige Versuche unternommen, um Statements zu bilden, wo der Optimizer die Indizes wieder zulässt. Dabei wurden die Spalten geändert, über die gejoint wurde:
+Folgend wurden einige Versuche unternommen, um Statements zu bilden, damit der Optimizer Indizes wieder zulässt. Dabei wurden die Spalten geändert, über die gejoint werden:
 \begin{lstlisting}[style=sql]
 SELECT *
 FROM orders, lineitems, partsupps, parts
@@ -1339,8 +1356,8 @@ Predicate Information (identified by operation id):
    4 - access("PARTSUPPS"."PS_SUPPKEY"="PARTS"."P_PARTKEY")
 \end{lstlisting}
 \textbf{Reflexion} \newline
-Bei Bushy Trees werden Indizes ignoriert. Einzig bei einem Left Deep Join gelang es, durch Indizes einen Performance-Zuwachs zu erreichen.
-Bei diesem Versuch wurde darauf geachtet, dass die Spalte, über die auf der linken Seite gejoint wurde, beim nächsten Join wieder verwendet wurde.
+Bei Bushy Trees werden die Indizes ignoriert. Einzig bei einem Left Deep Join gelang es, durch Indizes einen Performance-Zuwachs zu erreichen.\\
+Bei diesem Versuch wurde darauf geachtet, dass die Spalte, über die auf der rechten Seite gejoint wurde, beim nächsten Join auf der linken Seite verwendet wurde.
 
 \section{Eigene SQL-Anfrage}
 Wir haben zwei neue Tabellen gemäss folgenden Angaben erstellt.
@@ -1378,11 +1395,11 @@ Predicate Information (identified by operation id):
    3 - filter("T2"."O_ORDERKEY">=2345 AND "T2"."O_ORDERKEY"<=2543)
    4 - filter("T1"."O_ORDERKEY">=2345 AND "T1"."O_ORDERKEY"<=2543)
 \end{lstlisting}
-Da auf den Tabellen kein Index besteht, muss ein Full Tale Scan durchgeführt werden, 
-was die hohen Kosten verursachen. Sowohl das joinen, sortieren wie auch das projezieren 
+Da auf den Tabellen kein Index besteht, muss ein Full Table Scan durchgeführt werden, 
+was die hohen Kosten verursachen. Sowohl das joinen, sortieren wie auch das projizieren 
 verursachen wenig kosten, da das Resultat nur auf wenige Anzahl Zeilen geschätzt wird.
 
-Als Gegenmassnahme haben wir zwei Indexes erstellt, jeweils auf die Spalte, auf 
+Als Gegenmassnahme haben wir zwei Indizes erstellt, jeweils auf die Spalte, auf 
 die wir selektieren. 
 \begin{lstlisting}[style=sql]
 CREATE INDEX test1_oorderkey_idx ON test1(o_orderkey);
@@ -1408,24 +1425,25 @@ Predicate Information (identified by operation id):
        filter("T1"."O_ORDERKEY"="T2"."O_ORDERKEY")
    6 - access("T2"."O_ORDERKEY">=2345 AND "T2"."O_ORDERKEY"<=2543)
 \end{lstlisting}
-Durch die Indexes werden zwei Index Range Scan durchgeführt, welche viel weniger Kosten verursachen. 
+Durch die Indizes werden zwei Index Range Scan durchgeführt, welche viel weniger Kosten verursachen. 
 Auch im Vergleich zur ersten Variante, wird nur eine Tabelle sortiert und nachher erst gejoint. 
-Schlussendlich wird wird die Projektion ausgeführt.
+Schlussendlich wird die Projektion ausgeführt.
 
 Dies für zu einer Kostenersparnis vom Faktor 1200.
 
 \section{Reflexion}
 Wir hatten zuerst Probleme uns auf dem DB-Server anzumelden, da wir unser Passwort nicht wussten. So 
-probierten wir die uns bekannten Passwörter aus, was schliesslich dazu führte, dass unser Benutzername
-gesperrt wurde, da zu viele Anfragen durchgeführt wurden. Da wir auch keinen SSH-Zugriff auf diesen 
-Server haben, beauftragten wir eine andere Gruppe damit unser Konto zu aktivieren.
+probierten wir die uns bekannten Passwörter aus, was schliesslich dazu führte, dass unser Account
+gesperrt wurde, da zu viele Anmeldeanfragen durchgeführt wurden. Da wir auch keinen SSH-Zugriff auf diesen 
+Server hatten, beauftragten wir eine andere Gruppe unser Konto zu aktivieren.
 \begin{lstlisting}[style=sql]
 ALTER USER dbarc01 ACCOUNT UNLOCK;
 \end{lstlisting}
-Sie konnten dies jedoch nicht vornehmen, da unsere Benutzer zu wenig Rechte haben. Schlussendlich 
-haben wir dem Dozenten Herrn Wyss geschrieben, dass er uns freischalten könnte. Damit wir trotzdem 
-arbeiten konnten, bis wir Antwort vom Dozenten erhielten, durften wir den Account der Gruppe dbarc03 
+Sie konnten dies jedoch nicht vornehmen, da unsere Accounts zu wenig Rechte haben. Schlussendlich 
+haben wir dem Dozenten, Herr Wyss, geschrieben, dass er uns freischalten könnte. Damit wir trotzdem 
+arbeiten konnten, bis wir eine Antwort vom Dozenten erhielten, durften wir den Account der Gruppe dbarc03 
 verwenden.
+
 
 % Inhalt Ende 
 \end{document} 
