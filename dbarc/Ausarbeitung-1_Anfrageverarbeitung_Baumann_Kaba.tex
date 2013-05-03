@@ -132,6 +132,7 @@ Die Ausarbeitung haben wir mit folgender Datenbankverbindung ausgeführt.
 
 \includegraphics{login_daten.png}
 
+\newpage
 \section{Vorbereitung}
 \subsection{Einrichten Datenbasis}
 Die Datenbank haben wir mit folgenden Querys eingerichtet.
@@ -177,6 +178,7 @@ SELECT table_name, num_rows
 FROM user_tab_statistics;
 \end{lstlisting}
 Folgende Tabellenstatistik haben wir mit den oben genannten Querys erhoben.
+
 \begin{tabular}{l||r|r|r|r}
   Tabelle & Anzahl Zeilen & Grösse in Bytes & Anzahl Blöcke & Anzahl Extents \\ \hline
   \hline
@@ -189,8 +191,11 @@ Folgende Tabellenstatistik haben wir mit den oben genannten Querys erhoben.
   REGIONS & 5 & 65'536 & 8 & 1 \\ \hline
   SUPPLIERS & 10'000 & 2'097'152 & 256 & 17 \\
 \end{tabular}	
+
 Je nachdem, wo man die Werte ausliest, erhält man andere Werte für die Grösse und 
 Anzahl Blöcke.
+
+\newpage
 \section{Ausführungsplan}
 \begin{lstlisting}[style=sql]
 EXPLAIN PLAN FOR
@@ -218,6 +223,7 @@ Kindknoten plus die eigenen Kosten berechnet.
 Für die nächsten Aufgaben verwenden wir das obenstehende Statement. Wir 
 haben jeweils das Query ausgetauscht um den Ausführungsplan zu erhalten.
 
+\newpage
 \section{Versuche ohne Index}
 \subsection{Projektion}
 \begin{lstlisting}[style=sql]
@@ -321,6 +327,7 @@ Predicate Information (identified by operation id):
 Im Vergleich zum vorherigen Query sind nur die Kosten minimal gestiegen, dies 
 ist auf die zweite Bedingung zurück zu führen.
 
+\newpage
 \begin{lstlisting}[style=sql]
 SELECT *
 FROM orders
@@ -368,6 +375,7 @@ Berechnung wird vereinfacht, so muss nur eine Operation ausgeführt werden:
 o_orderkey = 22222 AND o_clerk = 'Clerk#000000286'
 \end{lstlisting}
 
+\newpage
 \begin{lstlisting}[style=sql]
 SELECT *
 FROM orders
@@ -469,6 +477,7 @@ Predicate Information (identified by operation id):
    1 - access("C_CUSTKEY"="O_CUSTKEY")
    2 - filter("O_ORDERKEY"<100)
 \end{lstlisting}
+\newpage
 \begin{lstlisting}[style=sql]
 SELECT *
 FROM customers, orders
@@ -521,6 +530,7 @@ einem Hash Join mit der customers Tabelle vereinigt, welche mit einem Full Table
 gelesen wurde. Da auf der Tabelle orders eine Selektion vorgenommen wird, wird diese 
 Tabelle immer auf die Linke Seite des Joins genommen.
 
+\newpage
 \section{Versuche mit Index}
 Mit folgenden Befehlen wurden die Indizes erstellt.
 \begin{lstlisting}[style=sql]
@@ -562,7 +572,7 @@ die benötigten Tupel wesentlich schneller gefunden werden. Im Vergleich ohne In
 werden nur minimal weniger Tupel ausgelesen, jedoch viel schneller. Hingegen der 
 Hash Unique wird massiv schneller durchgearbeitet und liefert auch weniger Tupel zurück.
 Bei beiden Projektionen beanspruchen keine Kosten.
-
+\newpage
 \subsection{Selektion}
 \begin{lstlisting}[style=sql]
 SELECT *
@@ -607,7 +617,7 @@ Predicate Information (identified by operation id):
 \textbf{Reflexion} \newline
 Der Hint erzwingt einen Full Table Scan, was zu einen massiven Anstieg des Ressourcenverbrauchs führt.\\
 Der Index wird dabei nicht benutzt.
-
+\newpage
 \begin{lstlisting}[style=sql]
 SELECT *
 FROM orders
@@ -658,7 +668,7 @@ Predicate Information (identified by operation id):
 \textbf{Reflexion} \newline
 Da ein Index auf o\_orderkey besteht, werden direkt nur die benötigten Tupel ausgelesen. Was so 
 gut wie keine Kosten verursacht und Zeit benötigt.
-
+\newpage
 \begin{lstlisting}[style=sql]
 SELECT *
 FROM orders
@@ -703,7 +713,7 @@ Predicate Information (identified by operation id):
 \textbf{Reflexion} \newline
 Der Optimizer wandelt den BETWEEN-Befehl in zwei mathematische Operationen um.\\
 Hier wird der Index Range Scan ausgeführt, weil der Range klein genug gewählt wurde, dass sich die Anzahl IO-Zugriffe noch lohnt.
-
+\newpage
 \begin{lstlisting}[style=sql]
 SELECT *
 FROM orders
@@ -754,7 +764,7 @@ Predicate Information (identified by operation id):
 \textbf{Reflexion} \\
 Hier wurden die Between-Klausel auch in zwei mathematische Funktionen umgewandelt.\\
 Durch die Indizes werden Bitmaps verwendet, was zu ein schneller Ausführung führt.
-
+\newpage
 \subsection{Join}
 \begin{lstlisting}[style=sql]
 SELECT *
@@ -807,6 +817,7 @@ Im Vergleich zum vorherigen Query wird eine zusätzliche Selektion verwendet. Di
 Tabelle orders zuerst mit einem Index Range Scan auf die gewünschten Tupel durchsucht wird. Dadurch ist 
 diese Tabelle kleiner als die andere und rückt auf die Linke Seite der Hash Join Funktion.
 
+\newpage
 Es wird ein neuer Index eingefügt:
 \begin{lstlisting}[style=sql]
 CREATE INDEX c_custkey_ix ON customer(c_custkey);
@@ -892,6 +903,7 @@ Wenn der Hash Join nicht verwendet werden darf, wird hier ein Merge Join durchge
 Auch hier sind die Kosten höher als beim Hash Join.
 Der Grund dafür ist, dass zum einten die Tabellen für den Merge zuvor sortiert werden müssen.
 
+\newpage
 \section{Quiz}
 \begin{lstlisting}[style=sql]
 SELECT count(*)
@@ -924,10 +936,11 @@ Predicate Information (identified by operation id):
    4 - filter("PS_PARTKEY"=5)
    5 - filter("P_TYPE"='MEDIUM ANODIZED BRASS' OR "P_TYPE"='MEDIUM BRUSHED COPPER')
 \end{lstlisting}
-Wie aus dem Ausführungsplan ohne Indexes hervorgeht, werden 35'577 Kosten verursacht. Diese 
+Wie aus dem Ausführungsplan ohne Indizes hervorgeht, werden 35'577 Kosten verursacht. Diese 
 werden hauptsächlich durch einen Full Table Scan auf LINEITEMS verursacht.
 
-Wie haben danach verschieden indexes eingeführt und sind schliesslich auf folgendes Endergebnis gekommen:
+\newpage
+Wir haben danach verschieden Indizes eingeführt und sind schliesslich auf folgendes Endergebnis gekommen:
 
 \begin{lstlisting}[style=sql]
 CREATE INDEX p_partkey_ix ON parts(p_partkey);
@@ -971,6 +984,7 @@ Durch die Erstellung der Indizes werden keine Full Table Scans, sondern Index Ra
 durchgeführt. Als Hilfskonstruktion werden Bitmaps und Nested Loops verwendet. Dies führt zu
 Gesamtkosten von 52, was zu einer Kostenersparnis von Faktor 685 führt.
 
+\newpage
 \section{Deep Left Join}
 Verwendetes Statement, um ein initiales Deep Left Join zu erzeugen:
 \begin{lstlisting}[style=sql]
@@ -1004,7 +1018,8 @@ Predicate Information (identified by operation id):
 Im ersten Statement sieht man gut, dass ein Deep Left Join erzeugt wird.\\
 Die Kosten sind dementsprechend extrem hoch. Diese Kosten werden vor allem durch Joins von Tabellen mit bereits gejointen Tabellen verursacht.
 
-Modifiziertes Statement, um ein Bushy Tree zu erzeugen:
+\newpage
+Modifiziertes Statement, um einen Bushy Tree zu erzeugen:
 \begin{lstlisting}[style=sql]
 SELECT  *
 FROM (
@@ -1052,6 +1067,8 @@ CREATE INDEX ps_suppkey_ix ON partsupps(ps_suppkey);
 CREATE INDEX ps_partkey_ix ON partsupps(ps_partkey);
 CREATE INDEX p_partkey_ix ON parts(p_partkey);
 \end{lstlisting}
+
+\newpage
 Das Ergebnis bei Left Deep Join:
 \begin{lstlisting}[style=queryexecutionplan]
 ------------------------------------------------------------------------------------------
@@ -1101,6 +1118,7 @@ Predicate Information (identified by operation id):
 Der Optimizer hatte sowohl bei Left Deep Join, als auch beim Bushy Tree keine Indizes verwendet.
 Somit konnte auch kein Performance-Zuwachs feststellt werden.
 
+\newpage
 Mit den folgenden Statements wurde versucht, einen Fast Full Index-Scan zu erzwingen. Jedoch wurde das vom Optimizer ebenfalls ignoriert.
 
 Left Deep Join mit Hint
@@ -1135,6 +1153,7 @@ WHERE partsupps.ps_partkey = parts.p_partkey
 WHERE l_suppkey = ps_suppkey;
 \end{lstlisting}
 
+\newpage
 Folgend wurden einige Versuche unternommen, um Statements zu bilden, damit der Optimizer Indizes wieder zulässt. Dabei wurden die Spalten geändert, über die gejoint werden:
 \begin{lstlisting}[style=sql]
 SELECT *
@@ -1186,6 +1205,7 @@ Predicate Information (identified by operation id):
    4 - access("PARTSUPPS"."PS_SUPPKEY"="PARTS"."P_PARTKEY")
 \end{lstlisting}
 
+\newpage
 \begin{lstlisting}[style=sql]
 SELECT *
 FROM
@@ -1246,6 +1266,7 @@ Predicate Information (identified by operation id):
    4 - access("PARTSUPPS"."PS_SUPPKEY"="PARTS"."P_PARTKEY")
 \end{lstlisting}
 
+\newpage
 \begin{lstlisting}[style=sql]
 SELECT o_orderkey, l_orderkey, ps_suppkey, p_partkey
 FROM orders, lineitems, partsupps, parts
@@ -1359,6 +1380,7 @@ Predicate Information (identified by operation id):
 Bei Bushy Trees werden die Indizes ignoriert. Einzig bei einem Left Deep Join gelang es, durch Indizes einen Performance-Zuwachs zu erreichen.\\
 Bei diesem Versuch wurde darauf geachtet, dass die Spalte, über die auf der rechten Seite gejoint wurde, beim nächsten Join auf der linken Seite verwendet wurde.
 
+\newpage
 \section{Eigene SQL-Anfrage}
 Wir haben zwei neue Tabellen gemäss folgenden Angaben erstellt.
 \begin{lstlisting}[style=sql]
@@ -1399,6 +1421,7 @@ Da auf den Tabellen kein Index besteht, muss ein Full Table Scan durchgeführt w
 was die hohen Kosten verursachen. Sowohl das joinen, sortieren wie auch das projizieren 
 verursachen wenig kosten, da das Resultat nur auf wenige Anzahl Zeilen geschätzt wird.
 
+\newpage
 Als Gegenmassnahme haben wir zwei Indizes erstellt, jeweils auf die Spalte, auf 
 die wir selektieren. 
 \begin{lstlisting}[style=sql]
@@ -1431,6 +1454,7 @@ Schlussendlich wird die Projektion ausgeführt.
 
 Dies für zu einer Kostenersparnis vom Faktor 1200.
 
+\newpage
 \section{Reflexion}
 \subsection{Allgemein}
 Über die ganze Ausarbeitung hinweg konnten wir uns mit SQL-Queries und Ausführungsplänen vertieft auseinandersetzen.
@@ -1449,8 +1473,7 @@ arbeiten konnten, bis wir eine Antwort vom Dozenten erhielten, durften wir den A
 verwenden.
 
 \subsection{Indizes}
-Durch die Anwendung von Indizes in der Praxis konnten wir feststellen, dass Indizes beim Vergleich von zwei Spalten keinen
-Performance-Zuwachs bringen. Wir haben weiter festgestellt, dass Indizes Sinn machen, wenn z.B. ein Range über das Statement "BETWEEN ... AND ..." abgefragt wird.
+Durch die Anwendung von Indizes konnten wir feststellen, dass die Performance stark verbessert werden konnte.
 
 % Inhalt Ende 
 \end{document} 
