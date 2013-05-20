@@ -44,12 +44,12 @@
 	</target>
 	
 	<target name="run.socket.server" depends="compile" description="launches sockets bank">
-			<java classname="bank.StartServer" fork="yes" dir=".">
-				<arg value="bank.socket.ServerDriver"/>
-				<arg value="12345"/>
-				<classpath refid="bank.class.path"/>
-			</java>
-		</target>
+		<java classname="bank.StartServer" fork="yes" dir=".">
+			<arg value="bank.socket.ServerDriver"/>
+			<arg value="12345"/>
+			<classpath refid="bank.class.path"/>
+		</java>
+	</target>
 	
 	<target name="run.socket.client" depends="compile" description="launches sockets bank">
 		<java classname="bank.StartClient" fork="yes" dir=".">
@@ -63,7 +63,7 @@
 	<target name="run.servlet.client" depends="compile" description="launches sockets bank">
 		<java classname="bank.StartClient" fork="yes" dir=".">
 			<arg value="bank.servlet.ClientDriver"/>
-			<arg value="http://localhost:8080/bankserver/bank"/>
+			<arg value="http://localhost:8080/bankserver/java.html"/>
 			<classpath refid="bank.class.path"/>
 		</java>
 	</target>
@@ -82,6 +82,24 @@
 
 	<target name="undeploy.servlet.server" description="deletes war in tomcat">
 		<delete file="${tomcat.home}/webapps/bankserver.war"/>
+	</target>
+	
+	<target name="run.rmi.server" depends="compile" description="launches rmi bank server">
+		<java classname="bank.StartServer" fork="yes" dir=".">
+			<arg value="bank.rmi.ServerDriver"/>
+			<arg value="localhost"/>
+			<arg value="1099"/>
+			<classpath refid="bank.class.path"/>
+		</java>
+	</target>
+	
+	<target name="run.rmi.client" depends="compile" description="launches rmi bank client">
+		<java classname="bank.StartClient" fork="yes" dir=".">
+			<arg value="bank.rmi.ClientDriver"/>
+			<arg value="localhost"/>
+			<arg value="1099"/>
+			<classpath refid="bank.class.path"/>
+		</java>
 	</target>
 	
 </project>
