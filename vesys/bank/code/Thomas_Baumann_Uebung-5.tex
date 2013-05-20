@@ -128,7 +128,8 @@
 Ich habe zwei neue Interfaces eingeführt, das einte Interface \Kursiv{IRemoteAccount} 
 erweitert das Interface \Kursiv{IAccount} um das Marker Interface \Kursiv{java.rmi.Remote} 
 und dementsprechend für die Bank das Interface \Kursiv{IRemoteBank}.
-Die lokale Bank habe ich so abgeändert, so dass beiden Klassen die neu erstellten Interfaces
+
+Die lokale Bank habe ich so abgeändert, dass beide Klassen die neu erstellten Interfaces
 implementieren und der Rückgabetyp von \Kursiv{getAccount(String number)} ebenfalls dem neuen 
 Interface entspricht. Als letzte Änderung habe ich Zeile 45 eingefügt, damit alle Anforderungen
 für RMI abgedeckt sind.
