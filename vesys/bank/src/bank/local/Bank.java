@@ -22,7 +22,7 @@ import bank.OverdrawException;
  * @see IBank
  * @see IAccount
  * @author Thomas Baumann
- * @version 1.0
+ * @version 1.1
  */
 public class Bank implements IRemoteBank {
 
