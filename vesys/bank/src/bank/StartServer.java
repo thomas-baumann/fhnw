@@ -55,6 +55,7 @@ public final class StartServer {
 
         try {
             server.start(serverArgs);
+            System.out.println("Bank server started...");
         } catch (IOException e) {
             System.out.println("Problem while starting the server:");
             e.printStackTrace();
