@@ -102,7 +102,7 @@
 	Übung 5
 }
 \author{Thomas Baumann}
-\date{08. April 2013}
+\date{20. Mai 2013}
 
 
 % hier beginnt das Dokument
@@ -125,18 +125,24 @@
 
 % Inhalt Start
 \section{Beschreibung}
-Für die Übung 3 habe ich XML-RPC ausgewählt. Dazu habe ich ein flaches Interface 
-\Kursiv{FlatBank} eingeführt, welches die Schnittstelle zwischen Client und Server 
-darstellt und die Interfaces Bank und Konto vereint. Die Methoden der Konten enthalten 
-einen zusätzlichen Parameter mit der Kontonummer. 
+Ich habe zwei neue Interfaces eingeführt, das einte Interface \Kursiv{IRemoteAccount} 
+erweitert das Interface \Kursiv{IAccount} um das Marker Interface \Kursiv{java.rmi.Remote} 
+und dementsprechend für die Bank das Interface \Kursiv{IRemoteBank}.
+Die lokale Bank habe ich so abgeändert, so dass beiden Klassen die neu erstellten Interfaces
+implementieren und der Rückgabetyp von \Kursiv{getAccount(String number)} ebenfalls dem neuen 
+Interface entspricht. Als letzte Änderung habe ich Zeile 45 eingefügt, damit alle Anforderungen
+für RMI abgedeckt sind.
 
 Wie bereits die vorherigen Übungen, ist diese Lösung nicht Thread-Safe.
 
 \section{Code}
-\lstinputlisting[language=java,caption=Interface für XML-RPC,style=JavaStyle]{../src/bank/xmlrpc/FlatBank.java}
-\lstinputlisting[language=java,caption=Server Driver,style=JavaStyle]{../src/bank/xmlrpc/ServerDriver.java}
-\lstinputlisting[language=java,caption=Server Bank,style=JavaStyle]{../src/bank/xmlrpc/ServerBank.java}
-\lstinputlisting[language=java,caption=Client Driver,style=JavaStyle]{../src/bank/xmlrpc/ClientDriver.java}
+\lstinputlisting[language=java,caption=Interface des Accounts für RMI,style=JavaStyle]{../src/bank/IRemoteAccount.java}
+\lstinputlisting[language=java,caption=Interface der Bank für RMI,style=JavaStyle]{../src/bank/IRemoteBank.java}
+
+\lstinputlisting[language=java,caption=Lokale Bank,style=JavaStyle]{../src/bank/local/Bank.java}
+
+\lstinputlisting[language=java,caption=Server Driver,style=JavaStyle]{../src/bank/rmi/ServerDriver.java}
+\lstinputlisting[language=java,caption=Client Driver,style=JavaStyle]{../src/bank/rmi/ClientDriver.java}
 
 % Inhalt Ende 
 \end{document} 
