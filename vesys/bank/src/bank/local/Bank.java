@@ -1,6 +1,8 @@
 package bank.local;
 
 import java.io.IOException;
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -8,6 +10,8 @@ import java.util.Set;
 
 import bank.IAccount;
 import bank.IBank;
+import bank.IRemoteAccount;
+import bank.IRemoteBank;
 import bank.InactiveException;
 import bank.OverdrawException;
 
@@ -20,7 +24,7 @@ import bank.OverdrawException;
  * @author Thomas Baumann
  * @version 1.0
  */
-public class Bank implements IBank {
+public class Bank implements IRemoteBank {
 
     private Map<String, Account> accounts = new HashMap<String, Account>();
 
@@ -36,8 +40,9 @@ public class Bank implements IBank {
     }
 
     @Override
-    public String createAccount(String owner) {
+    public String createAccount(String owner) throws RemoteException {
         Account ac = new Account(owner);
+        UnicastRemoteObject.exportObject(ac, 0);
         this.accounts.put(ac.getNumber(), ac);
         return ac.getNumber();
     }
@@ -53,7 +58,7 @@ public class Bank implements IBank {
     }
 
     @Override
-    public IAccount getAccount(String number) {
+    public IRemoteAccount getAccount(String number) {
         return this.accounts.get(number);
     }
 
@@ -69,7 +74,7 @@ public class Bank implements IBank {
         }
     }
 
-    static class Account implements IAccount {
+    static class Account implements IRemoteAccount {
         private static int accountNumbers;
         private String number;
         private String owner;
