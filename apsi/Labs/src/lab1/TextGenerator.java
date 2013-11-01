@@ -3,13 +3,27 @@ package lab1;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Random;
 
 public class TextGenerator {
 
+	private ArrayList<Integer> iterated = new ArrayList<Integer>();
 	private String[][] text;
 	private int nr = -1;
+	Random rand = new Random();
+	private boolean randomize;
+	
+	public TextGenerator(String fileName, boolean randomize) {
+		try {
+			this.loadTextFile(fileName);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		this.randomize = randomize;
+	}
 
-	public void loadTextFile(String fileName) throws IOException {
+	private void loadTextFile(String fileName) throws IOException {
 		BufferedReader lineReader = new BufferedReader(new FileReader(fileName));
 		int lines = 0;
 		while (lineReader.readLine() != null) {
@@ -39,7 +53,18 @@ public class TextGenerator {
 	}
 
 	public String getNextText() {
-		return this.getText(this.nr--);
+		if (randomize) {
+			int localNr = rand.nextInt();
+			if (!iterated.contains(localNr)) {
+				iterated.add(localNr);
+				return this.getText(localNr);
+			} else {
+				return getNextText();
+			}
+		} else {
+			return this.getText(this.nr--);
+		}
+		
 	}
 
 	public String getText(int nr) {

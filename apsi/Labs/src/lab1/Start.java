@@ -8,19 +8,17 @@ public class Start {
 
 	public static void main(String[] args) throws IOException {
 
-		TextGenerator tg = new TextGenerator();
-		tg.loadTextFile("rsc/Patterns.txt");
-
-		Hash hashFunction = new Hash();
+		TextGenerator tg = new TextGenerator("rsc/Patterns.txt", true);
+		
+		DESHash hashFunction = new DESHash();
 
 		String textOriginal = readFile("rsc/original.txt");
-		long hashOriginal = hashFunction.getHash(textOriginal);
-
-		long hash;
+		int hashOriginal = hashFunction.hash(textOriginal);
+		int hash;
 		String text;
 		do {
 			text = tg.getNextText();
-			hash = hashFunction.getHash(text);
+			hash = hashFunction.hash(text);
 		} while (hashOriginal != hash);
 
 		System.out.println(hashOriginal);
