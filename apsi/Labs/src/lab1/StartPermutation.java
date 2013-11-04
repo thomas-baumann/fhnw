@@ -23,7 +23,7 @@ public class StartPermutation {
 		// hashmap for hash and text of the original message
 		HashMap<Integer, String> hashesOrg = new HashMap<Integer, String>();
 
-		// hashmap for all found collisions with the hash and list of all textes with this hashe
+		// hashmap for all found collisions with the hash and list of all texts with this hash
 		HashMap<Integer, ArrayList<String>> hashesFound = new HashMap<Integer, ArrayList<String>>();
 		
 		DESHash hashFunction = new DESHash();

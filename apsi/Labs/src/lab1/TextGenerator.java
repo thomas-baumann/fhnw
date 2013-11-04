@@ -42,13 +42,13 @@ public class TextGenerator {
 		while (line != null) {
 			int pos = line.indexOf("|");
 			if (pos >= 0) {
-				// seperator found
+				// separator found
 				// add first part on position 0
 				this.text[lineNr][0] = line.substring(0, pos);
-				// add second part on positon 1
+				// add second part on position 1
 				this.text[lineNr][1] = line.substring(pos + 1, line.length());
 			} else {
-				// no seperator found, add the same text on both sides 
+				// no separator found, add the same text on both sides 
 				this.text[lineNr][0] = line;
 				this.text[lineNr][1] = line;
 			}
@@ -60,13 +60,13 @@ public class TextGenerator {
 
 	public String getNextText() {
 		if (randomize) {
-			// search random number which wasn't used
+			// search random number which wasn't used already
 			int localNr;
 			do {
 				localNr = rand.nextInt();
 			} while(iterated.contains(localNr));
 			iterated.add(localNr);
-			// get the text with this binary represenation
+			// get the text with this binary representation
 			return this.getText(localNr);
 		} else {
 			// get the text with the binary representation of the current number
