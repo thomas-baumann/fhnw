@@ -1,116 +1,117 @@
-\documentclass[10pt]{scrartcl}
-
-%Math
-\usepackage{amsmath}
-\usepackage{amsfonts}
-\usepackage{amssymb}
-\usepackage{amsthm}
-\usepackage{ulem}
-\usepackage{stmaryrd} %f\UTF{00FC}r Achtung!
-
-%PageStyle
-\usepackage[ngerman]{babel} % deutsche Silbentrennung
+\documentclass[12pt]{scrartcl}
 \usepackage[utf8]{inputenc}
-\usepackage{fancyhdr, graphicx}
-\usepackage[scaled=0.92]{helvet}
-\usepackage{enumitem}
-\usepackage{parskip}
-\usepackage[a4paper,top=2cm]{geometry}
-\setlength{\textwidth}{17cm}
-\setlength{\oddsidemargin}{-0.5cm}
+ \usepackage{fancyhdr, graphicx}
+ \usepackage[german]{babel}
+ \usepackage[scaled=0.92]{helvet}
+ \usepackage{enumitem}
+ \usepackage{parskip}
+ \usepackage{lastpage} % for getting last page number
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{color}
+\usepackage{xcolor}
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
+\newcommand\Fontvi{\fontsize{6}{7.2}\selectfont}
 
-
-% Shortcommands
-\newcommand{\Bold}[1]{\textbf{#1}} %Boldface
-\newcommand{\Kursiv}[1]{\textit{#1}} %Italic
-\newcommand{\T}[1]{\text{#1}} %Textmode
-\newcommand{\Nicht}[1]{\T{\sout{$ #1 $}}} %Streicht unnötige Sachen durch
-
-%Arrows
-\newcommand{\lra}{\leftrightarrow}
-\newcommand{\ra}{\rightarrow}
-\newcommand{\la}{\leftarrow}
-\newcommand{\lral}{\longleftrightarrow}
-\newcommand{\ral}{\longrightarrow}
-\newcommand{\lal}{\longleftarrow}
-\newcommand{\Lra}{\Leftrightarrow}
-\newcommand{\Ra}{\Rightarrow}
-\newcommand{\La}{\Leftarrow}
-\newcommand{\Lral}{\Longleftrightarrow}
-\newcommand{\Ral}{\Longrightarrow}
-\newcommand{\Lal}{\Longleftarrow}
-
-%Config
-\renewcommand{\headrulewidth}{0pt}
-\setlength{\headheight}{15.2pt}
-
-%Metadata
-\title{
-\vspace{5cm}
-Applikationssicherheit Lab1
+ \renewcommand{\familydefault}{\sfdefault}
+ 
+ \fancypagestyle{firststyle}{ %Style of the first page
+ \fancyhf{}
+ \fancyheadoffset[L]{0.6cm}
+ \lhead{
+ \includegraphics[scale=0.8]{./FHNW_HT_10mm.jpg}}
+ \renewcommand{\headrulewidth}{0pt}
+ \cfoot{Thomas Baumann \& Egemen Kaba}
 }
-\author{Thomas Baumann \& Egemen Kaba}
-\date{5. Semester (HS13)}
 
+\fancypagestyle{documentstyle}{ %Style of the rest of the document
+ \fancyhf{}
+ \fancyheadoffset[L]{0.6cm}
+\lhead{
+ \includegraphics[scale=0.8]{./FHNW_HT_10mm.jpg}}
+ \renewcommand{\headrulewidth}{0pt}
+ \lfoot{Laborübung 1}
+ \cfoot{Thomas Baumann \& Egemen Kaba}
+ \rfoot{\thepage\ / \pageref{LastPage} }
+}
 
-% hier beginnt das Dokument
-\begin{document}
+\pagestyle{firststyle} %different look of first page
+ 
+\title{ %Titel
+Applikationssicherheit 
+\vspace{0.2cm}
+}
 
-% Titelbild
-\maketitle
-\thispagestyle{empty}
+ \begin{document}
+ \maketitle
+ \thispagestyle{firststyle}
+ \pagestyle{firststyle}
+ \begin{abstract}
+ \begin{center}
+ Laborübung 1
+ \end{center}
+ \vspace{0.5cm}
+\hrulefill
+\end{abstract}
 
-\newpage
-\pagenumbering{arabic}
-
-%Inhalt Start
+ \pagestyle{documentstyle}
+ \tableofcontents
+ \pagebreak
 \section{Ressourcen}
-Die Files wurden in ISO-8859-1 kodiert, damit die Umlaute richtig dargestellt und ausgelesen werden können.
+Die Dateien wurden in ISO-8859-1 kodiert, damit die Umlaute korrekt dargestellt und ausgelesen werden können.
 
 \textbf{original.txt}\newline
-Die originale Textnachricht von Bob, plaintext
+Die originale Textnachricht von Bob als Plaintext.
 
 \textbf{Patterns.txt}\newline
-Patterns, die benutzt werden, um eine gefälschte Nachricht zu generieren, welche der Originalnachricht ähnlich sieht.
-Die Form dazu ist die folgende:
+Patterns, die benutzt werden, um eine gefälschte Nachricht zu generieren, welche den gleichen Hashwert, wie die Originalnachricht hat.\newline
+Die Form dazu ist folgende:
 \begin{itemize}
-\item Je Pattern existiert eine Linie im File
+\item Je Pattern existiert eine Linie in der Datei
 \begin{itemize}
-\item Gesamthaft also 32 Linien => Bits in einem Integer
+\item Gesamthaft also 32 Linien $\Longrightarrow$ Bits in einem Integer
 \end{itemize}
-\item Jede Linie ist durch eine Trennlinie, in diesem Fall „|“, unterteilt
+\item Je Linie existieren zwei Möglichkeiten, die durch eine vertikale Trennlinie unterteilt sind (Text 1 $|$Text 2 ) $\Longrightarrow$ 0 bzw. 1 eines Bits
 \end{itemize}
 
 \textbf{Patterns\_Org.txt}\newline
-Patterns, um eine Original Nachricht zu erstellen.\newline
-Sie ist gleich aufgebaut, wie Patterns.txt.
+Patterns, um eine Originalnachricht zu erstellen.\newline
+Sie ist gleich aufgebaut, wie \textit{Patterns.txt}.
+
 \section{Klassen}
 Implementierungsdetails siehe Sourcecode.
 
-\textbf{DESHash}\newline
-Hier wurde die DES-Funktion aus der Aufgabenstellung implementiert. Dabei wurden die Klassen DESEngine für den DES und PaddedBufferedBlockCipher, um die Engine in einer BlockCipher auszuführen, von Bouncy Castle verwendet.
-Es wurde grundsätzlich die Methodik der Aufgabenstellung übernommen. Einzige Anmerkung gilt es bei dem Ergebnis des DES zu machen. Und zwar arbeitet DES mit zwei 64 Bit Blöcken. Bei der Weiterverwendung des Outputs müssen diese zwei Blöcke untereinander ein xor ausführen.
-
-\textbf{Start (main)}\newline
-Dies ist ein Startpunkt der Applikation. Dabei wird die vorgegebene originale Nachricht verwendet und permutierende Kopien erstellt.
+\textbf{Start}\newline
+Dies ist ein möglicher Startpunkt der Applikation. Dabei wird die vorgegebene originale Nachricht verwendet und permutierende Fälschungen erstellt.
 
 \textbf{StartPermutation (main)}\newline
-Dies ist der zweite Startpunkt der Applikation. In diesem Fall werden sowohl permutierende Kopien, als auch permutierende originale Nachrichten erstellt.
+Dies ist der zweite  mögliche Startpunkt der Applikation. In diesem Fall werden sowohl permutierende Fälschungen, als auch permutierende originale Nachrichten erstellt. Dabei werden zwei verschiedene Texte pro Aufruf erstellt.
 
 \textbf{TextGenerator}\newline
-Diese Klasse liest ein Patterns-File ein und generiert daraus Texte. Da ein Patterns-File genau 32 Möglichkeiten hat ein Text zu generieren, wurde auf Basis eines Integers gearbeitet, um zu bestimmen, welche Möglichkeit (0 oder 1 => links oder rechts) auszuwählen ist. Dieser Integer kann entweder inkrementell oder randomisiert gewählt werden.
-\section{Ergebnisse}
-Es wurden zwei Varianten bzw. Interpretationsmöglichkeiten der Aufgabestellung implementiert.\newline
-Die einte Variante sieht vor, dass ein festes originales File vorhanden ist. Die Fälschungen werden anhand eines Pattern-Files generiert.\newline
-Als Startmethode wurde hier die Klasse Start genommen.
-Diese Variante erzielte jedoch kein Ergebnis, auch wenn es über Nacht lief.
+Diese Klasse liest ein Pattern-Datei ein und generiert daraus bei Aufruf der entsprechenden Methode Texte. Da ein Pattern-Datei genau 32 Möglichkeiten hat ein Text zu generieren, wird auf Basis eines Integers gearbeitet, um zu bestimmen, welche Möglichkeit (0 oder 1 => links oder rechts) auszuwählen ist. Dieser Integer kann entweder inkrementell oder randomisiert gewählt werden.
 
+\textbf{DESHash}\newline
+In dieser Klasse ist die DES-Funktion aus der Aufgabenstellung implementiert. Dabei werden die Klassen DESEngine für den DES und PaddedBufferedBlockCipher, um die Engine in einer BlockCipher auszuführen, von Bouncy Castle verwendet.
+
+Es wurde die Methodik der Aufgabenstellung übernommen. Einzige Anmerkung gilt es bei dem Ergebnis des DES zu machen. Und zwar arbeitet DES mit zwei 64 Bit Blöcken. Bei der Weiterverwendung des Outputs als ein 64 Bit Block müssen diese zwei Blöcke dementsprechend mit xor vereint werden.
+
+\section{Ergebnisse}
+Es wurden zwei Varianten bzw. Interpretationsmöglichkeiten der Aufgabestellung implementiert.
+
+\textbf{Variante 1}\newline
+Die erste Variante sieht vor, dass ein festes originales File vorhanden ist. Die Fälschungen werden anhand eines Pattern-Files generiert.\newline
+Als Startmethode wird hier die Klasse Start genommen.
+Diese Variante erzielte jedoch kein Ergebnis, auch wenn sie über Nacht, also mehrere Stunden, lief.
+
+\textbf{Variante 2}\newline
 Die zweite Variante sieht vor, dass Originale, sowie Fälschungen anhand je eines Pattern-Files generiert werden.\newline
-Als Startmethode wurde hier die Klasse StartPermutation genommen und die gewünschte Anzahl Kollisionen in der Variable count angegeben.\newline
-Die Laufzeit betrug ca. 5 Minuten. Dies kann jedoch variieren.\newline
+Als Startmethode wird hier die Klasse StartPermutation genommen und die gewünschte Anzahl Kollisionen, nach der gesuchten werden soll, kann in der Variable count angegeben werden.\newline
+Die Laufzeit beträgt ca. 5 Minuten für fünf Kollisionen. Dies kann jedoch variieren, da mit der randomisierten Textgenerierung früher oder später ein entsprechender Text erstellt wird.
+
 Diese Variante erzielte folgendes Ergebnis mit 5 Kollisionen:
 
-
+--------------------------------------------\newline
 Found Hash: 574314342\newline
 Strings mapping to that Hash: \newline
 1) Meine liebe Alice, ich bedanke mich vom Herzen für Deinen sehr willkommenen Auftrag. Ich möchte Dich vertraulich aufmerksam machen, dass unsere Ingenieure etwas Sensationelles in den Kächern  halten : SunShineForever. Du kannst Dir plastisch denken was dahinten steckt! Du wirst die einzige sein, eine ansehnliche Menge Muster kostenlos zu erhalten. Ich bitte Dich den Betrag von 100.000.- Schweizer Franken auf das Konto mit der Nr. 222-1101.461.12 der  Bank ABC AG, in Basel CH zu überweisen.Ich freue mich Dir geholfen zu haben und verbleibe ich freundlichen Grüssen. Dein Bob, CEO\newline
@@ -137,5 +138,5 @@ Strings mapping to that Hash: \newline
 2) liebe Alice, ich bedanke mich aufrichtig für den sehr willkommenen Lieferungsvertrag. Ich möchte Dich vertraulich aufmerksam machen, dass wir etwas Sensationelles in den Reagenzgläsern haben: SunShineForever. Du kannst Dir plastisch vorstellen was darin steckt! Du wirst die einzige sein, eine ansehnliche Anzahl Muster gratis zu kriegen. Ich bitte Dich die Summe von 100.000.- Schweizer Franken auf das Konto Nr. 222-1101.461.10 der  Bank ABC AG, 4001 Basel zu überweisen.Ich freue mich Dir geholfen zu haben und verbleibe ich mit lieben Grüssen. Dein Bob, Geschäftsführer\newline
 --------------------------------------------
 
-% Inhalt Ende
-\end{document} 
+
+ \end{document}
