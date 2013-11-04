@@ -54,13 +54,12 @@ public class TextGenerator {
 
 	public String getNextText() {
 		if (randomize) {
-			int localNr = rand.nextInt();
-			if (!iterated.contains(localNr)) {
-				iterated.add(localNr);
-				return this.getText(localNr);
-			} else {
-				return getNextText();
-			}
+			int localNr;
+			do {
+				localNr = rand.nextInt();
+			} while(iterated.contains(localNr));
+			iterated.add(localNr);
+			return this.getText(localNr);
 		} else {
 			return this.getText(this.nr--);
 		}

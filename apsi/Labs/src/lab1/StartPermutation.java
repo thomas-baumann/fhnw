@@ -9,6 +9,8 @@ public class StartPermutation {
 
 	public static void main(String[] args) throws IOException {
 		int count = 5;
+		int counter = 0;
+		int block = 2048;
 		int countFound = 0;
 		TextGenerator tg = new TextGenerator("rsc/Patterns.txt", true);
 		TextGenerator tgOrg = new TextGenerator("rsc/Patterns_Org.txt", true);
@@ -19,7 +21,7 @@ public class StartPermutation {
 		DESHash hashFunction = new DESHash();
 		do {
 			// Fill up new hashes
-			for (int i = 0; i < 2048; i++) {
+			for (int i = 0; i < block; i++) {
 				String text = tg.getNextText();
 				int hash = hashFunction.hash(text);
 				hashesFake.put(hash, text);
@@ -40,6 +42,7 @@ public class StartPermutation {
 						if (!al.contains(t)) {
 							countFound++;
 							al.add(t);
+							printResult(h, hashesOrg.get(h), hashesFake.get(h));
 						}
 						if (!al.contains(t2)) {
 							al.add(t2);
@@ -51,9 +54,12 @@ public class StartPermutation {
 						al.add(hashesOrg.get(h));
 						al.add(hashesFake.get(h));
 						hashesFound.put(h, al);
+						printResult(h, hashesOrg.get(h), hashesFake.get(h));
 					}
 				}
 			}
+			counter += block;
+			System.out.println(counter);
 		} while (count != countFound);
 		
 		// Show us the hashes
@@ -68,7 +74,18 @@ public class StartPermutation {
 			}
 			System.out.println("--------------------------------------------");
 		}
-		
-
+	}
+	
+	private static void printResult(int h, String org, String fake) {
+		DESHash hashFunc = new DESHash();
+		System.out.println("Collision found!");
+		System.out.println("Hash: " + h);
+		System.out.println("Original: " + org);
+		System.out.println("Fake: " + fake);
+		int checkOrg = hashFunc.hash(org);
+		int checkFake = hashFunc.hash(fake);
+		System.out.println("Original Hash: " + checkOrg);
+		System.out.println("Fake Hash: " + checkFake);
+		System.out.println();
 	}
 }
