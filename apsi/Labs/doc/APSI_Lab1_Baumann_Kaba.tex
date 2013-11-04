@@ -1,0 +1,141 @@
+\documentclass[10pt]{scrartcl}
+
+%Math
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{ulem}
+\usepackage{stmaryrd} %f\UTF{00FC}r Achtung!
+
+%PageStyle
+\usepackage[ngerman]{babel} % deutsche Silbentrennung
+\usepackage[utf8]{inputenc}
+\usepackage{fancyhdr, graphicx}
+\usepackage[scaled=0.92]{helvet}
+\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage[a4paper,top=2cm]{geometry}
+\setlength{\textwidth}{17cm}
+\setlength{\oddsidemargin}{-0.5cm}
+
+
+% Shortcommands
+\newcommand{\Bold}[1]{\textbf{#1}} %Boldface
+\newcommand{\Kursiv}[1]{\textit{#1}} %Italic
+\newcommand{\T}[1]{\text{#1}} %Textmode
+\newcommand{\Nicht}[1]{\T{\sout{$ #1 $}}} %Streicht unnötige Sachen durch
+
+%Arrows
+\newcommand{\lra}{\leftrightarrow}
+\newcommand{\ra}{\rightarrow}
+\newcommand{\la}{\leftarrow}
+\newcommand{\lral}{\longleftrightarrow}
+\newcommand{\ral}{\longrightarrow}
+\newcommand{\lal}{\longleftarrow}
+\newcommand{\Lra}{\Leftrightarrow}
+\newcommand{\Ra}{\Rightarrow}
+\newcommand{\La}{\Leftarrow}
+\newcommand{\Lral}{\Longleftrightarrow}
+\newcommand{\Ral}{\Longrightarrow}
+\newcommand{\Lal}{\Longleftarrow}
+
+%Config
+\renewcommand{\headrulewidth}{0pt}
+\setlength{\headheight}{15.2pt}
+
+%Metadata
+\title{
+\vspace{5cm}
+Applikationssicherheit Lab1
+}
+\author{Thomas Baumann \& Egemen Kaba}
+\date{5. Semester (HS13)}
+
+
+% hier beginnt das Dokument
+\begin{document}
+
+% Titelbild
+\maketitle
+\thispagestyle{empty}
+
+\newpage
+\pagenumbering{arabic}
+
+%Inhalt Start
+\section{Ressourcen}
+Die Files wurden in ISO-8859-1 kodiert, damit die Umlaute richtig dargestellt und ausgelesen werden können.
+
+\textbf{original.txt}\newline
+Die originale Textnachricht von Bob, plaintext
+
+\textbf{Patterns.txt}\newline
+Patterns, die benutzt werden, um eine gefälschte Nachricht zu generieren, welche der Originalnachricht ähnlich sieht.
+Die Form dazu ist die folgende:
+\begin{itemize}
+\item Je Pattern existiert eine Linie im File
+\begin{itemize}
+\item Gesamthaft also 32 Linien => Bits in einem Integer
+\end{itemize}
+\item Jede Linie ist durch eine Trennlinie, in diesem Fall „|“, unterteilt
+\end{itemize}
+
+\textbf{Patterns\_Org.txt}\newline
+Patterns, um eine Original Nachricht zu erstellen.\newline
+Sie ist gleich aufgebaut, wie Patterns.txt.
+\section{Klassen}
+Implementierungsdetails siehe Sourcecode.
+
+\textbf{DESHash}\newline
+Hier wurde die DES-Funktion aus der Aufgabenstellung implementiert. Dabei wurden die Klassen DESEngine für den DES und PaddedBufferedBlockCipher, um die Engine in einer BlockCipher auszuführen, von Bouncy Castle verwendet.
+Es wurde grundsätzlich die Methodik der Aufgabenstellung übernommen. Einzige Anmerkung gilt es bei dem Ergebnis des DES zu machen. Und zwar arbeitet DES mit zwei 64 Bit Blöcken. Bei der Weiterverwendung des Outputs müssen diese zwei Blöcke untereinander ein xor ausführen.
+
+\textbf{Start (main)}\newline
+Dies ist ein Startpunkt der Applikation. Dabei wird die vorgegebene originale Nachricht verwendet und permutierende Kopien erstellt.
+
+\textbf{StartPermutation (main)}\newline
+Dies ist der zweite Startpunkt der Applikation. In diesem Fall werden sowohl permutierende Kopien, als auch permutierende originale Nachrichten erstellt.
+
+\textbf{TextGenerator}\newline
+Diese Klasse liest ein Patterns-File ein und generiert daraus Texte. Da ein Patterns-File genau 32 Möglichkeiten hat ein Text zu generieren, wurde auf Basis eines Integers gearbeitet, um zu bestimmen, welche Möglichkeit (0 oder 1 => links oder rechts) auszuwählen ist. Dieser Integer kann entweder inkrementell oder randomisiert gewählt werden.
+\section{Ergebnisse}
+Es wurden zwei Varianten bzw. Interpretationsmöglichkeiten der Aufgabestellung implementiert.\newline
+Die einte Variante sieht vor, dass ein festes originales File vorhanden ist. Die Fälschungen werden anhand eines Pattern-Files generiert.\newline
+Als Startmethode wurde hier die Klasse Start genommen.
+Diese Variante erzielte jedoch kein Ergebnis, auch wenn es über Nacht lief.
+
+Die zweite Variante sieht vor, dass Originale, sowie Fälschungen anhand je eines Pattern-Files generiert werden.\newline
+Als Startmethode wurde hier die Klasse StartPermutation genommen und die gewünschte Anzahl Kollisionen in der Variable count angegeben.\newline
+Die Laufzeit betrug ca. 5 Minuten. Dies kann jedoch variieren.\newline
+Diese Variante erzielte folgendes Ergebnis mit 5 Kollisionen:
+
+
+Found Hash: 574314342\newline
+Strings mapping to that Hash: \newline
+1) Meine liebe Alice, ich bedanke mich vom Herzen für Deinen sehr willkommenen Auftrag. Ich möchte Dich vertraulich aufmerksam machen, dass unsere Ingenieure etwas Sensationelles in den Kächern  halten : SunShineForever. Du kannst Dir plastisch denken was dahinten steckt! Du wirst die einzige sein, eine ansehnliche Menge Muster kostenlos zu erhalten. Ich bitte Dich den Betrag von 100.000.- Schweizer Franken auf das Konto mit der Nr. 222-1101.461.12 der  Bank ABC AG, in Basel CH zu überweisen.Ich freue mich Dir geholfen zu haben und verbleibe ich freundlichen Grüssen. Dein Bob, CEO\newline
+2) liebe Alice, ich bedanke mich aufrichtig für den erfreulichen Lieferungsvertrag. Ich möchte Dich aufmerksam machen, dass unsere Ingenieure etwas Sensationelles in den Reagenzgläsern  halten : SunShineForever. Du kannst Dir plastisch vorstellen was dahinten steckt! Du wirst die erste  sein, eine ansehnliche Anzahl Fläschen gratis zu erhalten. Ich bitte Dich die Summe von 100.000.- CHF auf das Konto mit der Nr. 222-1101.461.10 von der Bank ABC AG, in Basel zu überweisen.Ich freue mich Dir gedient zu haben und schliesse ich freundlichen Grüssen. Bob, CEO\newline
+--------------------------------------------\newline
+Found Hash: -2128439365\newline
+Strings mapping to that Hash: \newline
+1) liebe Alice, ich bedanke mich vom Herzen für den sehr willkommenen Auftrag. Ich möchte Deine Firma vertraulich aufmerksam machen, dass wir etwas Herausragendes in den Reagenzgläsern  halten : SunShineForever. Du kannst Dir  vorstellen was dahinten steckt! Du wirst die erste  sein, eine ansehnliche Anzahl Muster gratis zu kriegen. Ich bitte Dich die Summe von 100.000.- Schweizer Franken auf das Konto mit der Nr. 222-1101.461.12 der  Bank ABC AG, 4001 Basel zu überweisen.Ich freue mich Dir geholfen zu haben und verbleibe ich mit lieben Grüssen. Dein Bob, Geschäftsführer\newline
+2) Meine liebe Alice, ich bedanke mich aufrichtig für den erfreulichen Lieferungsvertrag. Ich möchte Dich vertraulich aufmerksam machen, dass unsere Ingenieure etwas Herausragendes in den Kächern haben: SunShineForever. Du kannst Dir plastisch vorstellen was darin steckt! Du wirst die erste  sein, eine grosse Menge Muster kostenlos zu kriegen. Ich bitte Dich den Betrag von 100.000.- Schweizer Franken auf das Konto Nr. 222-1101.461.10 von der Bank ABC AG, in Basel CH zu überweisen.Ich hoffe Dir geholfen zu haben und verbleibe ich freundlichen Grüssen. Dein Bob, CEO\newline
+--------------------------------------------\newline
+Found Hash: 1990800991\newline
+Strings mapping to that Hash: \newline
+1) Meine liebe Alice, ich bedanke mich vom Herzen für Deinen sehr willkommenen Auftrag. Ich möchte Deine Firma aufmerksam machen, dass unsere Ingenieure etwas Sensationelles in den Kächern  halten : SunShineForever. Du kannst Dir  vorstellen was darin steckt! Du wirst die erste  sein, eine grosse Menge Fläschen gratis zu kriegen. Ich bitte Dich den Betrag von 100.000.- CHF auf das Konto mit der Nr. 222-1101.461.12 der  Bank ABC AG, in Basel CH zu überweisen.Ich hoffe Dir geholfen zu haben und schliesse ich mit lieben Grüssen. Dein Bob, Geschäftsführer\newline
+2) liebe Alice, ich bedanke mich aufrichtig für Deinen erfreulichen Auftrag. Ich möchte Dich aufmerksam machen, dass unsere Ingenieure etwas Herausragendes in den Kächern  halten : SunShineForever. Du kannst Dir plastisch vorstellen was darin steckt! Du wirst die einzige sein, eine grosse Menge Fläschen gratis zu erhalten. Ich bitte Dich die Summe von 100.000.- Schweizer Franken auf das Konto Nr. 222-1101.461.10 von der Bank ABC AG, 4001 Basel CH zu überweisen.Ich freue mich Dir geholfen zu haben und verbleibe ich freundlichen Grüssen. Bob, CEO\newline
+--------------------------------------------\newline
+Found Hash: 252380\newline
+Strings mapping to that Hash: \newline
+1) Meine liebe Alice, ich bedanke mich aufrichtig für den erfreulichen Auftrag. Ich möchte Dich aufmerksam machen, dass wir etwas Herausragendes in den Kächern haben: SunShineForever. Du kannst Dir  vorstellen was dahinten steckt! Du wirst die erste  sein, eine grosse Menge Fläschen kostenlos zu kriegen. Ich bitte Dich den Betrag von 100.000.- CHF auf das Konto Nr. 222-1101.461.12 von der Bank ABC AG, 4001 Basel CH zu überweisen.Ich hoffe Dir gedient zu haben und verbleibe ich freundlichen Grüssen. Bob, CEO\newline
+2) liebe Alice, ich bedanke mich aufrichtig für Deinen erfreulichen Auftrag. Ich möchte Dich vertraulich aufmerksam machen, dass wir etwas Herausragendes in den Kächern  halten : SunShineForever. Du kannst Dir  vorstellen was dahinten steckt! Du wirst die erste  sein, eine ansehnliche Menge Muster kostenlos zu kriegen. Ich bitte Dich die Summe von 100.000.- CHF auf das Konto Nr. 222-1101.461.10 von der Bank ABC AG, in Basel CH zu überweisen.Ich freue mich Dir geholfen zu haben und schliesse ich freundlichen Grüssen. Bob, CEO\newline
+--------------------------------------------\newline
+Found Hash: 1391400107\newline
+Strings mapping to that Hash: \newline
+1) Meine liebe Alice, ich bedanke mich aufrichtig für Deinen erfreulichen Lieferungsvertrag. Ich möchte Deine Firma vertraulich aufmerksam machen, dass wir etwas Sensationelles in den Reagenzgläsern haben: SunShineForever. Du kannst Dir plastisch denken was dahinten steckt! Du wirst die einzige sein, eine ansehnliche Menge Muster gratis zu kriegen. Ich bitte Dich die Summe von 100.000.- Schweizer Franken auf das Konto Nr. 222-1101.461.12 von der Bank ABC AG, in Basel CH zu überweisen.Ich hoffe Dir geholfen zu haben und schliesse ich freundlichen Grüssen. Dein Bob, Geschäftsführer\newline
+2) liebe Alice, ich bedanke mich aufrichtig für den sehr willkommenen Lieferungsvertrag. Ich möchte Dich vertraulich aufmerksam machen, dass wir etwas Sensationelles in den Reagenzgläsern haben: SunShineForever. Du kannst Dir plastisch vorstellen was darin steckt! Du wirst die einzige sein, eine ansehnliche Anzahl Muster gratis zu kriegen. Ich bitte Dich die Summe von 100.000.- Schweizer Franken auf das Konto Nr. 222-1101.461.10 der  Bank ABC AG, 4001 Basel zu überweisen.Ich freue mich Dir geholfen zu haben und verbleibe ich mit lieben Grüssen. Dein Bob, Geschäftsführer\newline
+--------------------------------------------
+
+% Inhalt Ende
+\end{document} 
