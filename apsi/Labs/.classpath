@@ -7,5 +7,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/Labs/lib/bcprov-jdk15on-149_doc.zip!/bcprov-jdk15on-149/docs"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.27-bin.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
