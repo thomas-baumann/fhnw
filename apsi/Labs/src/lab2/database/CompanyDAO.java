@@ -40,7 +40,7 @@ public class CompanyDAO {
 		pStatement.setString(3, company.getEmail());
 		pStatement.setString(4, company.getName());
 		pStatement.setString(5, company.getAddress());
-		pStatement.setInt(6, company.getPostcode());
+		pStatement.setString(6, company.getPostcode());
 		pStatement.setString(7, company.getTown());
 
 		pStatement.executeUpdate();
@@ -48,8 +48,8 @@ public class CompanyDAO {
 
 	private Company createCompany(ResultSet rs) throws SQLException {
 		if (rs.next()) {
-			return new Company(rs.getString("username"), rs.getString("password"), rs.getString("email"), rs.getString("name"),
-					rs.getString("address"), rs.getInt("postcode"), rs.getString("town"));
+			return new Company(rs.getInt("id"), rs.getString("username"), rs.getString("password"), rs.getString("email"),
+					rs.getString("name"), rs.getString("address"), rs.getString("postcode"), rs.getString("town"));
 		} else {
 			return null;
 		}
