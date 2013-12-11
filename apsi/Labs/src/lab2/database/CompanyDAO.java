@@ -12,7 +12,8 @@ public class CompanyDAO {
 
 	private Connection connection;
 
-	public CompanyDAO() throws SQLException {
+	public CompanyDAO() throws SQLException, ClassNotFoundException {
+		Class.forName("com.mysql.jdbc.Driver");
 		this.connection = DriverManager.getConnection("jdbc:mysql://localhost/apsi_lab2", "apsi", "0P]wEvoeSwEz+lYg");
 	}
 
