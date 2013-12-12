@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS `companies` (
   `address` varchar(100) NOT NULL,
   `postcode` varchar(4) NOT NULL,
   `town` varchar(100) NOT NULL,
+  `hashcode` varchar(64) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=9 ;
