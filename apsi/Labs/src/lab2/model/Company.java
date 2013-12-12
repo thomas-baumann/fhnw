@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
  * TODO: http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html
  * http://www.unicode.org/reports/tr18/
  */
-
 public class Company {
 
 	private final List<String> errors = new ArrayList<>();
@@ -23,8 +22,8 @@ public class Company {
 	private final String postcode;
 	private final String town;
 
-	public Company(String username, String password, String email, String name, String address, String zipcode, String town) {
-		this(0, username, password, email, name, address, zipcode, town);
+	public Company(String email, String name, String address, String zipcode, String town) {
+		this(0, null, null, email, name, address, zipcode, town);
 	}
 
 	public Company(int id, String username, String password, String email, String name, String address, String zipcode,
