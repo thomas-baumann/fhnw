@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import lab2.helpers.Utility;
+
 /*
  * TODO: http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html
  * http://www.unicode.org/reports/tr18/
@@ -23,13 +25,14 @@ public class Company {
 	private final String address;
 	private final String postcode;
 	private final String town;
+	private String hashCode;
 
 	public Company(String email, String name, String address, String zipcode, String town) {
-		this(0, null, null, email, name, address, zipcode, town);
+		this(0, null, null, email, name, address, zipcode, town, null);
 	}
 
 	public Company(int id, String username, String password, String email, String name, String address, String zipcode,
-			String town) {
+			String town, String hashcode) {
 		this.id = id;
 		this.username = username;
 		this.password = password;
@@ -38,6 +41,7 @@ public class Company {
 		this.address = address;
 		this.postcode = zipcode;
 		this.town = town;
+		this.hashCode = hashcode;
 	}
 
 	public int getId() {
@@ -66,7 +70,7 @@ public class Company {
 	 * @throws NoSuchAlgorithmException
 	 */
 	public void setPassword(String password) throws NoSuchAlgorithmException {
-		this.password = new String(MessageDigest.getInstance("SHA-256").digest(password.getBytes()));
+		this.password = password;
 	}
 
 	public String getEmail() {
@@ -88,14 +92,22 @@ public class Company {
 	public String getTown() {
 		return this.town;
 	}
+	
+	public String getHashCode() {
+		return this.hashCode;
+	}
+	
+	public void setHashCode(String hashCode) {
+		this.hashCode = hashCode;
+	}
 
-	public String[] validate() {
+	public List<String> validate() {
 		this.validateEmail();
 		this.validateName();
 		this.validateAddress();
 		this.validatePostcode();
 		this.validateTown();
-		return this.errors.toArray(new String[this.errors.size()]);
+		return this.errors;
 	}
 	
 	public List<String> validateUsernameAndPassword() {
@@ -104,8 +116,6 @@ public class Company {
 		String errPass = validatePassword();
 		if (errUser != null) errs.add(errUser);
 		if (errPass != null) errs.add(errPass);
-		errs.add("" + password.length()); // TODO debugging purposes
-		errs.add(password);
 		return errs;
 	}
 

@@ -11,8 +11,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.mysql.jdbc.StringUtils;
+
 import lab2.model.Company;
 import lab2.database.CompanyDAO;
+import lab2.helpers.Utility;
 
 public class Controller {
 
@@ -46,7 +49,7 @@ public class Controller {
 		}
 	}
 
-	public void registerPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	public void registerPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, SQLException, NoSuchAlgorithmException {
 		if ("POST".equals(request.getMethod())) {
 			String name = request.getParameter("companyname");
 			String address = request.getParameter("address");
@@ -54,31 +57,23 @@ public class Controller {
 			String town = request.getParameter("city");
 			String email = request.getParameter("mail");
 			Company c = new Company(email, name, address, zipcode, town);
-			List<String> errors = new ArrayList<>();
-			String[] valErr = c.validate();
-			for (String err : valErr) {
-				errors.add(err);
-			}
+			List<String> errors = c.validate();
 			if (errors.size() == 0) {
-				String username = "blub"; // TODO generate these
-				String password = "blub";
-				c.setUsername(username);
-				try {
-					c.setPassword(password);
-				} catch (NoSuchAlgorithmException e) {
-					throw new RuntimeException(e.getMessage());
+				int counter = 1;
+				String password = null;
+				while (companyDAO.getCompanyByUsername(name + counter) != null) {
+					counter++;
 				}
-				List<String> errPassUser = c.validateUsernameAndPassword();
-				errors.addAll(errPassUser);
+				String username = name + counter;
+				c.setUsername(username);
+				password = Utility.generateRandomString(32);
+				errors.add(password); //TODO debugging
+				c.setPassword(Utility.hashString(password));
 			} else {
 				errors.add("Benutzereingaben sind nicht korrekt.");
 			}
-			if (errors.size() == 0) {
-				try {
-					companyDAO.saveOrUpdaetCompany(c);
-				} catch (SQLException e) {
-					errors.add("Verbindung zur Datenbank fehlgeschlagen.");
-				}
+			if (errors.size() == 1) {
+				companyDAO.saveOrUpdateCompany(c);
 			}
 			if (errors.size() > 0) {
 				request.setAttribute("errors", errors);
@@ -91,30 +86,35 @@ public class Controller {
 		}
 	}
 	
-	public void loginGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	public void loginGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, SQLException {
 		if ("GET".equals(request.getMethod())) {
-			request.getRequestDispatcher(LOGIN).forward(request, response);
+			if (request.getSession().getAttribute("userId") != null && request.getSession().getAttribute("hashCode") != null) {
+				String hashCode = (String) request.getSession().getAttribute("hashCode");
+				int userId = (int) request.getSession().getAttribute("userId");
+				Company c = companyDAO.getCompanyById(userId);
+				if (c != null && c.getHashCode() != null && hashCode.equals(c.getHashCode())) {
+					request.getRequestDispatcher(MAIN).forward(request, response);
+				}
+			} else {
+				request.getRequestDispatcher(LOGIN).forward(request, response);
+			}
 		}
 	}
 
-	public void loginPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	public void loginPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, SQLException {
 		List<String> errors = new ArrayList<String>();
 		if ("POST".equals(request.getMethod())) {
 			String username = request.getParameter("username");
 			String password = request.getParameter("password");
-			String hashedPassword = hashString(password);
 			if (username == null || "".equals(username)) {
 				errors.add("Benutzername fehlt!");
 			}
 			if (password == null || "".equals(password)) {
 				errors.add("Passwort fehlt!");
 			}
+			String hashedPassword = Utility.hashString(password);
 			Company c = null;
-			try {
-				c = companyDAO.getCompanyByUsername(username);
-			} catch (SQLException e) {
-				errors.add("Verbindung zur Datenbank fehlgeschlagen.");
-			}
+			c = companyDAO.getCompanyByUsername(username);
 			if (c == null && errors.size() == 0) {
 				errors.add("Benutzername oder Passwort nicht korrekt.");
 			}
@@ -122,8 +122,11 @@ public class Controller {
 				if (c.getUsername() != null && username.equals(c.getUsername()) && 
 						c.getPassword() != null && hashedPassword.equals(c.getPassword())) {
 					if (request.getSession().getAttribute("userId") == null) {
-						request.getSession().setAttribute("userId", c.getId()); // TODO Hash this. if enough time: implement something with that information (could be valuable)
-						request.getSession().setAttribute("hashCode", hashString(c.toString())); // TODO save this in database
+						String hash = Utility.generateHashedString();
+						request.getSession().setAttribute("userId", c.getId());
+						request.getSession().setAttribute("hashCode", hash);
+						c.setHashCode(hash);
+						companyDAO.saveOrUpdateCompany(c);
 					}
 					request.getRequestDispatcher(MAIN).forward(request, response);
 				} else {
@@ -144,66 +147,80 @@ public class Controller {
 		}
 	}
 	
-	public void passwordResetPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	public void passwordResetPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, SQLException, NoSuchAlgorithmException {
 		if ("POST".equals(request.getMethod())) {
 			List<String> errors = new ArrayList<String>();
+			List<String> success = new ArrayList<String>();
 			String oldPass = request.getParameter("oldpass");
-			String hashedOldPass = hashString(oldPass);
+			String hashedOldPass = Utility.hashString(oldPass);
 			String newPass = request.getParameter("newpass");
 			String newPassConf = request.getParameter("newpassconf");
-			if (newPass == null) errors.add("Neues Passwort darf nicht leer sein.");
-			if (errors.size() == 0 && !newPass.equals(newPassConf)) errors.add("Bestätigung stimmt nicht mit dem Passwort überein.");
+			if (newPass == null) {
+				errors.add("Neues Passwort darf nicht leer sein.");
+			}
+			if (errors.size() == 0 && !newPass.equals(newPassConf)) {
+				errors.add("Bestätigung stimmt nicht mit dem Passwort überein.");
+			}
 
 			Company c = null;
 			if (errors.size() == 0) {
-				int id = (int) request.getSession().getAttribute("userId");
-				// TODO check for hash in database
-				try {
+				if (checkSession(request)) {
+					int id = (int) request.getSession().getAttribute("userId");
 					c = companyDAO.getCompanyById(id);
-				} catch (SQLException e) {
-					errors.add("Verbindung zur Datenbank fehlgeschlagen.");
-				}
-				if (errors.size() == 0 && !c.getPassword().equals(hashedOldPass)) {
-					errors.add("Passwort stimmt nicht." + hashedOldPass);
+					if (errors.size() == 0 && !c.getPassword().equals(hashedOldPass)) {
+						errors.add("Passwort stimmt nicht." + hashedOldPass);
+					}
+				} else {
+					errors.add("Identifikationsfehler!");
+					request.getSession().setAttribute("userId", null);
+					request.getSession().setAttribute("hashCode", null);
 				}
 			}
 			
 			if (errors.size() == 0) {
-				try {
-					c.setPassword(hashString(newPass));
-				} catch (NoSuchAlgorithmException e) {
-					// TODO proof ignore
-				}
-				try {
-					companyDAO.saveOrUpdaetCompany(c);
-				} catch (SQLException e) {
-					errors.add("Verbindung zur Datenbank fehlgeschlagen.");
+				c.setPassword(newPass);
+				errors.addAll(c.validateUsernameAndPassword());
+				c.setPassword(Utility.hashString(newPass));
+				if (errors.size() == 0){
+					companyDAO.saveOrUpdateCompany(c);
 				}
 			}
 			if (errors.size() > 0) {
 				request.setAttribute("errors", errors);
 				request.getRequestDispatcher(PASSWORDRESET).forward(request, response);
-			} else { //TODO make a success
-				errors.add("Änderung war erfolgreich.");
-				request.setAttribute("errors", errors);
-				request.getRequestDispatcher(PASSWORDRESET).forward(request, response);
+			} else {
+				success.add("Änderung war erfolgreich.");
+				request.setAttribute("success", success);
+				request.getRequestDispatcher(MAIN).forward(request, response);
 			}
 		}
 	}
 
-	public void logoutPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		if ("POST".equals(request.getMethod())) {
+	public void logout(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, SQLException {
+		if ("GET".equals(request.getMethod())) {
+			if (request.getSession().getAttribute("userId") != null) {
+				Company c = companyDAO.getCompanyById((int)request.getSession().getAttribute("userId"));
+				c.setHashCode(null);
+				companyDAO.saveOrUpdateCompany(c);
+			}
 			request.getSession().setAttribute("userId", null);
+			request.getSession().setAttribute("hashCode", null);
 			request.getRequestDispatcher(INDEX).forward(request, response);
 		}
 	}
 	
-	private String hashString(String in) {
-		try {
-			return new String(MessageDigest.getInstance("SHA-256").digest(in.getBytes()));
-		} catch (NoSuchAlgorithmException e) {
-			return null;
-		}
+	private boolean checkSession(HttpServletRequest request) throws SQLException {
+		if (request.getSession().getAttribute("userId") == null) return false;
+		int userId = (int) request.getSession().getAttribute("userId");
+		
+		if (request.getSession().getAttribute("hashCode") == null) return false;
+		String hash = (String) request.getSession().getAttribute("hashCode");
+		
+		Company c = companyDAO.getCompanyById(userId);
+		if (c == null) return false;
+		
+		if (!hash.equals(c.getHashCode())) return false;
+		return true;
 	}
 	
 }

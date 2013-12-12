@@ -17,36 +17,47 @@ public class RattleBitsServlet extends HttpServlet {
 		controller = new Controller();
 	}
 
-	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-		switch (request.getParameter("page")) {
-		case "login":
-			controller.loginGet(request, response);
-			break;
-		case "register":
-			controller.registerGet(request, response);
-			break;
-		case "password_reset":
-			controller.passwordResetGet(request, response);
-			break;
-		case "main":
-			controller.main(request, response);
-			break;
-		case "logout":
-			controller.logoutPost(request, response);
-		default:
-			controller.index(request, response);
-			break;
+	public void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws IOException, ServletException {
+		try {
+			switch (request.getParameter("page")) {
+			case "login":
+				controller.loginGet(request, response);
+				break;
+			case "register":
+				controller.registerGet(request, response);
+				break;
+			case "password_reset":
+				controller.passwordResetGet(request, response);
+				break;
+			case "main":
+				controller.main(request, response);
+				break;
+			case "logout":
+				controller.logout(request, response);
+				break;
+			default:
+				controller.index(request, response);
+				break;
+			}
+			;
+		} catch (Exception e) {
+			response.sendError(500);
 		}
-		;
 	}
 
-	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		if (request.getParameter("register") != null) {
-			controller.registerPost(request, response);
-		} else if (request.getParameter("login") != null) {
-			controller.loginPost(request, response);
-		} else if (request.getParameter("password_reset") != null) {
-			controller.passwordResetPost(request, response);
+	public void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		try {
+			if (request.getParameter("register") != null) {
+				controller.registerPost(request, response);
+			} else if (request.getParameter("login") != null) {
+				controller.loginPost(request, response);
+			} else if (request.getParameter("password_reset") != null) {
+				controller.passwordResetPost(request, response);
+			}
+		} catch (Exception e) {
+			response.sendError(500);
 		}
 	}
 
