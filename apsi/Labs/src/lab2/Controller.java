@@ -67,6 +67,7 @@ public class Controller {
 				String username = name + counter;
 				c.setUsername(username);
 				password = Utility.generateRandomString(32);
+//				errors.add(password); // TODO debugging
 				c.setPassword(Utility.hashString(password));
 			} else {
 				errors.add("Benutzereingaben sind nicht korrekt.");
