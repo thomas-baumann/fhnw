@@ -1,10 +1,11 @@
+<%@ page import="java.util.*" %>
 <html>
 	<head>
 		<title>APSI Lab2</title>
 		<h1>Rattle Bits</h1>
 	</head>
 	<body>
-		<form method="POST" action="/rattlebits" name="register">
+		<form method="POST" action="/rattlebits/RattleBitsFront?register=true" name="register">
 			<table>
 				<tr>
 					<th>Firmenname</th>
@@ -33,5 +34,18 @@
 				</tr>
 			</table>
 		</form>
+		<ul style="color:red;">
+		<%
+		    List<String> errors = (List<String>)request.getAttribute("errors");
+		    if (errors != null) {
+				Iterator<String> it = errors.iterator();
+			    while (it.hasNext()) {
+		%>
+	        <li><%= it.next() %></li>
+		<% 
+			} 
+		}
+		%>
+		</ul>
 	</body>
 </html>

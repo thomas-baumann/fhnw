@@ -1,5 +1,7 @@
 package lab2.model;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -58,8 +60,13 @@ public class Company {
 		return this.password;
 	}
 
-	public void setPassword(String password) {
-		this.password = password;
+	/**
+	 * Used to set the password from information gathered from user input.
+	 * @param password
+	 * @throws NoSuchAlgorithmException
+	 */
+	public void setPassword(String password) throws NoSuchAlgorithmException {
+		this.password = new String(MessageDigest.getInstance("SHA-256").digest(password.getBytes()));
 	}
 
 	public String getEmail() {
@@ -90,20 +97,35 @@ public class Company {
 		this.validateTown();
 		return this.errors.toArray(new String[this.errors.size()]);
 	}
+	
+	public List<String> validateUsernameAndPassword() {
+		List<String> errs = new ArrayList<String>();
+		String errUser = validateUsername();
+		String errPass = validatePassword();
+		if (errUser != null) errs.add(errUser);
+		if (errPass != null) errs.add(errPass);
+		errs.add("" + password.length()); // TODO debugging purposes
+		errs.add(password);
+		return errs;
+	}
 
-	private void validateUsername() {
+	private String validateUsername() {
 		Pattern p = Pattern.compile("[\\p{Alpha}\\p{Digit}.-_]{4,64}", Pattern.UNICODE_CHARACTER_CLASS);
 		Matcher m = p.matcher(this.username);
 		if (!m.matches()) {
-			this.errors.add("Es sind 4 bis 64 Gross-, Kleinbuchstaben, Zahlen, Punkte, Bindestriche oder Bodenstriche erlaubt");
+			return "Es sind 4 bis 64 Gross-, Kleinbuchstaben, Zahlen, Punkte, Bindestriche oder Bodenstriche erlaubt";
+		} else {
+			return null;
 		}
 	}
 
-	private void validatePassword() {
+	private String validatePassword() {
 		Pattern p = Pattern.compile("[\\p{Alpha}\\p{Digit}.-_]{8,64}", Pattern.UNICODE_CHARACTER_CLASS);
 		Matcher m = p.matcher(this.password);
 		if (!m.matches()) {
-			this.errors.add("Es sind 8 bis 64 Gross-, Kleinbuchstaben, Zahlen, Punkte, Bindestriche oder Bodenstriche erlaubt");
+			return "Es sind 8 bis 64 Gross-, Kleinbuchstaben, Zahlen, Punkte, Bindestriche oder Bodenstriche erlaubt";
+		} else {
+			return null;
 		}
 	}
 

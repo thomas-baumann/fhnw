@@ -5,7 +5,7 @@
 	</head>
 	<body>
 		<h5>Hello there!</h5>
-		<input type="submit" name="logout" value="Logout"/>
-		<a href="/rattlebits/password_reset.jsp">Passwort zur&uumlcksetzen</a>
+		<a href="/rattlebits/RattleBitsFront?page=logout">Logout</a>
+		<a href="/rattlebits/RattleBitsFront?page=password_reset">Passwort zur&uumlcksetzen</a>
 	</body>
 </html>

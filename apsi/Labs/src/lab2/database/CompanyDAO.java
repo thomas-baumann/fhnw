@@ -55,4 +55,13 @@ public class CompanyDAO {
 			return null;
 		}
 	}
+
+	public Company getCompanyById(int id) throws SQLException {
+		PreparedStatement pStatement = this.connection.prepareStatement("SELECT * FROM `companies` WHERE `id`=?");
+		pStatement.setInt(1, id);
+
+		ResultSet rs = pStatement.executeQuery();
+
+		return this.createCompany(rs);
+	}
 }

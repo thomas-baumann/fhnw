@@ -18,7 +18,7 @@
 				<tr>
 					<td colspan="2">
 						<input type="submit" name="login" value="Login"/>
-						<a href="/rattlebits/register.jsp">Registrieren</a>
+						<a href="/rattlebits/RattleBitsFront?page=register">Registrieren</a>
 					</td>
 				</tr>
 			</table>
@@ -35,6 +35,6 @@
 			} 
 		}
 		%>
-	</ul>
+		</ul>
 	</body>
 </html>

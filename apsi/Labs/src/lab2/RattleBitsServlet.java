@@ -20,17 +20,19 @@ public class RattleBitsServlet extends HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 		switch (request.getParameter("page")) {
 		case "login":
-			controller.login(request, response);
+			controller.loginGet(request, response);
 			break;
 		case "register":
-			controller.register(request, response);
+			controller.registerGet(request, response);
 			break;
-		case "password-reset":
-			controller.passwordReset(request, response);
+		case "password_reset":
+			controller.passwordResetGet(request, response);
 			break;
 		case "main":
 			controller.main(request, response);
 			break;
+		case "logout":
+			controller.logoutPost(request, response);
 		default:
 			controller.index(request, response);
 			break;
@@ -40,13 +42,11 @@ public class RattleBitsServlet extends HttpServlet {
 
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		if (request.getParameter("register") != null) {
-			controller.register(request, response);
+			controller.registerPost(request, response);
 		} else if (request.getParameter("login") != null) {
-			controller.login(request, response);
+			controller.loginPost(request, response);
 		} else if (request.getParameter("password_reset") != null) {
-			controller.passwordReset(request, response);
-		} else if (request.getParameter("logout") != null) {
-			controller.logout(request, response);
+			controller.passwordResetPost(request, response);
 		}
 	}
 
