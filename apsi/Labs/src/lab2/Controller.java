@@ -67,12 +67,12 @@ public class Controller {
 				String username = name + counter;
 				c.setUsername(username);
 				password = Utility.generateRandomString(32);
-				errors.add(password); // TODO debugging
+//				errors.add(password); // TODO debugging
 				c.setPassword(Utility.hashString(password));
 			} else {
 				errors.add("Benutzereingaben sind nicht korrekt.");
 			}
-			if (errors.size() == 1) {
+			if (errors.size() == 0) {
 				companyDAO.saveOrUpdateCompany(c);
 			}
 			if (errors.size() != 0) {
