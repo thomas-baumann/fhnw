@@ -8,7 +8,7 @@
 	<property name="classes.dir" value="${basedir}/bin"/>
 	
 	<!-- Change this -->
-	<property name="tomcat.home" value="/home/thomas/Programme/apache-tomcat-7.0.42/"/>
+	<property name="tomcat.home" value="C:\xampp\tomcat"/>
 		
 	<!-- Build classpath -->
 	<path id="classpath">
@@ -39,7 +39,7 @@
 	</target>
 
 	<target name="rattlebits.war" depends="compile">
-		<war warfile="${basedir}/rattlebits.war" needxmlfile="false">
+		<war warfile="${basedir}/rattlebits.war" webxml="${res.dir}/web.xml">
 			<classes dir="${classes.dir}" >
 				<include name="lab2/**.class" />
 				<include name="lab2/*/*.class" />

@@ -1,0 +1,13 @@
+CMD: Generate keystore
+1. keytool -genkey -alias <your alias> -keyalg RSA -keystore <your path to keystore>
+
+CMD: (optional) Proof the keystore exists
+2. keytool -list -keystore <your path to keytore>
+
+In $Tomcat\conf\server.xml
+3. Search for Connector port="8443"
+4. add following attributes:
+	keystoreFile=<your path to keystore> // use '/' instead of '\'
+	keystorePass=<your password>	
+	
+5. profit
