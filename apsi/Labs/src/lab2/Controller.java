@@ -72,10 +72,10 @@ public class Controller {
 			} else {
 				errors.add("Benutzereingaben sind nicht korrekt.");
 			}
-			if (errors.size() == 1) {
+			if (errors.size() == 0) {
 				companyDAO.saveOrUpdateCompany(c);
 			}
-			if (errors.size() > 0) {
+			if (errors.size() != 0) {
 				request.setAttribute("errors", errors);
 				request.getRequestDispatcher(REGISTER).forward(request, response);
 			} else {
@@ -159,7 +159,7 @@ public class Controller {
 				errors.add("Neues Passwort darf nicht leer sein.");
 			}
 			if (errors.size() == 0 && !newPass.equals(newPassConf)) {
-				errors.add("Bestätigung stimmt nicht mit dem Passwort überein.");
+				errors.add("Bestätigung stimmt nicht mit dem neuen Passwort überein.");
 			}
 
 			Company c = null;
@@ -168,7 +168,7 @@ public class Controller {
 					int id = (int) request.getSession().getAttribute("userId");
 					c = companyDAO.getCompanyById(id);
 					if (errors.size() == 0 && !c.getPassword().equals(hashedOldPass)) {
-						errors.add("Passwort stimmt nicht." + hashedOldPass);
+						errors.add("Passwort stimmt nicht.");
 					}
 				} else {
 					errors.add("Identifikationsfehler!");
