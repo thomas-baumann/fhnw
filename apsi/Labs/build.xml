@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<project name="APSI2" default="compile" basedir=".">
+<project name="APSI2" default="rattlebits.deploy" basedir=".">
 
 	<property name="src.dir" value="${basedir}/src"/>
 	<property name="res.dir" value="${basedir}/res"/>
@@ -8,7 +8,7 @@
 	<property name="classes.dir" value="${basedir}/bin"/>
 	
 	<!-- Change this -->
-	<property name="tomcat.home" value="C:\xampp\tomcat"/>
+	<property name="tomcat.home" value="/home/thomas/Programme/apache-tomcat-7.0.42/"/>
 		
 	<!-- Build classpath -->
 	<path id="classpath">
@@ -46,11 +46,13 @@
 			</classes>
 			<lib dir="${lib.dir}">
 				<include name="mysql*.jar" />
+				<include name="javax.mail.jar" />
 			</lib>
-			<fileset dir="${basedir}/res/rattlebits">
+			<fileset dir="${res.dir}/rattlebits">
 				<include name="*.jsp"/>
 				<include name="*.html"/>
 			</fileset>
+			<classes dir="${res.dir}" includes="*.properties"/>
 		</war>
 	</target>
 

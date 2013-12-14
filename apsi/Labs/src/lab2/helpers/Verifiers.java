@@ -34,16 +34,18 @@ public final class Verifiers {
 		URL url = new URL(urlString);
 		BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream()));
 		String line = r.readLine();
+		boolean notFound = true;
 		while (line != null) {
 			if (line.contains(notFoundMessage)) {
 				// notFoundMessage found, return false
-				return false;
+				notFound = false;
+				break;
 			}
 			line = r.readLine();
 		}
 		r.close();
 		// notFoundMessage not found, return true
-		return true;
+		return notFound;
 	}
 
 	public static boolean verifyEmail(String email) {
