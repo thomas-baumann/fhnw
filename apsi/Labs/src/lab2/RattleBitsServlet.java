@@ -1,7 +1,11 @@
 package lab2;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -9,15 +13,29 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import lab2.helpers.MailHelper;
+
 @WebServlet("/RattleBitsFront")
 public class RattleBitsServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -4099191990249828904L;
 	private Controller controller;
+	private Connection connection;
 
-	public RattleBitsServlet() throws SQLException, ClassNotFoundException {
+	public RattleBitsServlet() throws SQLException, ClassNotFoundException, IOException {
 		super();
-		this.controller = new Controller();
+
+		Properties properties = new Properties();
+		InputStream stream = MailHelper.class.getClassLoader().getResourceAsStream("config.properties");
+		properties.load(stream);
+		stream.close();
+		String dbUrl = properties.getProperty("db.url");
+		String dbUser = properties.getProperty("db.user");
+		String dbPassword = properties.getProperty("db.password");
+
+		Class.forName("com.mysql.jdbc.Driver");
+		this.connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+		this.controller = new Controller(this.connection);
 	}
 
 	@Override
@@ -72,6 +90,18 @@ public class RattleBitsServlet extends HttpServlet {
 		} catch (Exception e) {
 			response.sendError(500);
 		}
+	}
+
+	@Override
+	public void destroy() {
+		if (this.connection != null) {
+			try {
+				this.connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		super.destroy();
 	}
 
 }

@@ -2,6 +2,7 @@ package lab2;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +28,8 @@ public class Controller {
 
 	private CompanyDAO companyDAO;
 
-	public Controller() throws SQLException, ClassNotFoundException {
-		this.companyDAO = new CompanyDAO();
+	public Controller(Connection connection) {
+		this.companyDAO = new CompanyDAO(connection);
 	}
 
 	public void indexGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
@@ -78,17 +79,20 @@ public class Controller {
 			List<String> errors = c.validate();
 			if (errors.size() == 0) {
 				int counter = 1;
-				while (this.companyDAO.getCompanyByUsername(name + counter) != null) {
+				while (this.companyDAO.getCompanyByUsername(c.getName() + counter) != null) {
 					counter++;
 				}
-				c.setUsername(name + counter);
+				c.setUsername(c.getName() + counter);
 				String password = Utility.generateRandomString(12);
 				c.setPassword(password);
-
+			}
+			if (!MailHelper.sendMail(c.getEmail(), c.getUsername(), c.getPasswordNotHashed())) {
+				errors.add("Es ist ein Fehler beim Versenden der E-Mail aufgetreten. Bitte nochmals registrieren.");
+			}
+			if (errors.size() == 0) {
 				this.companyDAO.saveOrUpdateCompany(c);
-				MailHelper.sendMail(c.getEmail(), c.getUsername(), c.getPasswordNotHashed());
-				this.saveMessage(request,
-						"Sie haben eine E-Mail mit Ihrem Benutzername und Passwort erhalten.\nBitte loggen Sie sich mit diesem nun ein.");
+				this.saveMessage(request, "Sie haben eine E-Mail mit Ihrem Benutzername und Passwort erhalten.<br/>"
+						+ "Bitte loggen Sie sich mit diesem nun ein.");
 				this.redirectToLogin(request, response);
 			} else {
 				request.setAttribute("errors", errors);
@@ -120,9 +124,11 @@ public class Controller {
 			String username = request.getParameter("username");
 			String password = request.getParameter("password");
 			Company cInput = new Company(username, password);
-			Company c = this.companyDAO.getCompanyByUsername(username);
+			Company c;
 			List<String> errors = new ArrayList<>();
-			if (cInput.validateUsernameAndPassword().size() == 0 && c != null && cInput.getPassword().equals(c.getPassword())) {
+			if (cInput.validateUsernameAndPassword().size() == 0
+					&& (c = this.companyDAO.getCompanyByUsername(cInput.getUsername())) != null
+					&& cInput.getPassword().equals(c.getPassword())) {
 				c.setHashCode(Utility.generateRandomString(64));
 				request.getSession().setAttribute("userId", c.getId());
 				request.getSession().setAttribute("hashCode", c.getHashCode());

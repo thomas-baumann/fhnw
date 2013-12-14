@@ -1,7 +1,6 @@
 package lab2.database;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,9 +11,8 @@ public class CompanyDAO {
 
 	private Connection connection;
 
-	public CompanyDAO() throws SQLException, ClassNotFoundException {
-		Class.forName("com.mysql.jdbc.Driver");
-		this.connection = DriverManager.getConnection("jdbc:mysql://localhost/apsi_lab2", "apsi", "0P]wEvoeSwEz+lYg");
+	public CompanyDAO(Connection connection) {
+		this.connection = connection;
 	}
 
 	public Company getCompanyByUsername(String username) throws SQLException {
@@ -51,7 +49,8 @@ public class CompanyDAO {
 	private Company createCompany(ResultSet rs) throws SQLException {
 		if (rs.next()) {
 			return new Company(rs.getInt("id"), rs.getString("username"), rs.getString("password"), rs.getString("email"),
-					rs.getString("name"), rs.getString("address"), rs.getString("postcode"), rs.getString("town"), rs.getString("hashcode"));
+					rs.getString("name"), rs.getString("address"), rs.getString("postcode"), rs.getString("town"),
+					rs.getString("hashcode"));
 		} else {
 			return null;
 		}
@@ -65,7 +64,7 @@ public class CompanyDAO {
 
 		return this.createCompany(rs);
 	}
-	
+
 	public Company getCompanyByPassword(String pass) throws SQLException {
 		PreparedStatement pStatement = this.connection.prepareStatement("SELECT * FROM `companies` WHERE `password`=?");
 		pStatement.setString(1, pass);
