@@ -5,7 +5,7 @@
 		<h1>Rattle Bits</h1>
 	</head>
 	<body>
-		<form method="POST" action="/rattlebits/RattleBitsFront?page=register" name="register">
+		<form method="POST" action="/rattlebits/?page=register" name="register">
 			<table>
 				<tr>
 					<th>Firmenname</th>

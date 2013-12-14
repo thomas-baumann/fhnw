@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import lab2.helpers.MailHelper;
 
-@WebServlet("/RattleBitsFront")
+@WebServlet("/")
 public class RattleBitsServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -4099191990249828904L;

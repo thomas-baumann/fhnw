@@ -6,6 +6,6 @@
 		<h1>Rattle Bits</h1>
 	</head>
 	<body>
-		<a href="/rattlebits/RattleBitsFront?page=login">Login</a> <a href="/rattlebits/RattleBitsFront?page=register">Registrieren</a>
+		<a href="/rattlebits/?page=login">Login</a> <a href="/rattlebits/?page=register">Registrieren</a>
 	</body>
 </html>

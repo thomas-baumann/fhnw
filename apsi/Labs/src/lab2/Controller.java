@@ -20,11 +20,11 @@ public class Controller {
 
 	private final static String MESSAGE_SESSION = "message";
 
-	private final static String INDEX = "/index.jsp";
-	private final static String LOGIN = "/login.jsp";
-	private final static String MAIN = "/main.jsp";
-	private final static String PASSWORDRESET = "/password_reset.jsp";
-	private final static String REGISTER = "/register.jsp";
+	private final static String INDEX = "WEB-INF/index.jsp";
+	private final static String LOGIN = "WEB-INF/login.jsp";
+	private final static String MAIN = "WEB-INF/main.jsp";
+	private final static String PASSWORDRESET = "WEB-INF/password_reset.jsp";
+	private final static String REGISTER = "WEB-INF/register.jsp";
 
 	private CompanyDAO companyDAO;
 

@@ -8,7 +8,7 @@
 	<property name="classes.dir" value="${basedir}/bin"/>
 	
 	<!-- Change this -->
-	<property name="tomcat.home" value="/home/thomas/Programme/apache-tomcat-7.0.42/"/>
+	<property name="tomcat.home" value="C:\xampp\tomcat"/>
 		
 	<!-- Build classpath -->
 	<path id="classpath">
@@ -50,11 +50,8 @@
 				<include name="mysql-connector-java-5.1.27-bin.jar" />
 				<include name="javax.mail.jar" />
 			</lib>
-			<fileset dir="${res.dir}/rattlebits">
-				<include name="*.jsp"/>
-				<include name="*.html"/>
-			</fileset>
 			<classes dir="${res.dir}" includes="*.properties"/>
+			<webinf dir="${res.dir}/rattlebits"></webinf>
 		</war>
 	</target>
 

@@ -5,7 +5,7 @@
 		<h1>Rattle Bits</h1>
 	</head>
 	<body>
-		<form method="POST" action="/rattlebits/RattleBitsFront?page=password_reset" name="login">
+		<form method="POST" action="/rattlebits/?page=password_reset" name="login">
 			<table>
 				<tr>
 					<th>Altes Passwort</th>
