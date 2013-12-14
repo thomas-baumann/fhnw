@@ -116,11 +116,11 @@ public class Company {
 
 	public List<String> validate() {
 		this.errors.clear();
-		this.validateEmail();
 		this.validateName();
 		this.validateAddress();
 		this.validatePostcode();
 		this.validateTown();
+		this.validateEmail();
 		return this.errors;
 	}
 

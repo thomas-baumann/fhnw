@@ -1,23 +1,24 @@
 <%@ page import="java.util.*" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <html>
 	<head>
 		<title>APSI Lab2</title>
-		<h1>Rattle Bits</h1>
 	</head>
 	<body>
+		<h1>Rattle Bits</h1>
 		<form method="POST" action="/rattlebits/?page=password_reset" name="login">
 			<table>
 				<tr>
 					<th>Altes Passwort</th>
-					<td><input type="password" name="oldpass" value="${param.oldpass}"/></td>
+					<td><input type="password" name="oldpass" value="<c:out value="${param.oldpass}"/>"/></td>
 				</tr>
 				<tr>
 					<th>Neues Passwort</th>
-					<td><input type="password" name="newpass" value="${param.newpass}"/></td>
+					<td><input type="password" name="newpass" value="<c:out value="${param.newpass}"/>"/></td>
 				</tr>
 				<tr>
 					<th>Neues Passwort best&aumltigen</th>
-					<td><input type="password" name="newpassconf" value="${param.newpassconf}"/></td>
+					<td><input type="password" name="newpassconf" value="<c:out value="${param.newpassconf}"/>"/></td>
 				</tr>
 				<tr>
 					<td colspan="2">

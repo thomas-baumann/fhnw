@@ -1,19 +1,20 @@
-<%@ page import="java.util.*" %>
+<%@ page import="java.util.*,org.apache.commons.lang3.StringEscapeUtils" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <html>
 	<head>
 		<title>APSI Lab2</title>
-		<h1>Rattle Bits</h1>
 	</head>
 	<body>
+		<h1>Rattle Bits</h1>
 		<form method="POST" action="/rattlebits/?page=login" name="login">
 			<table>
 				<tr>
 					<th>Benutzername</th>
-					<td><input type="text" name="username" value="${param.username}"/></td>
+					<td><input type="text" name="username" value="<c:out value="${param.username}"/>"/></td>
 				</tr>
 				<tr>
 					<th>Passwort</th>
-					<td><input type="password" name="password" value="${param.password}"/></td>
+					<td><input type="password" name="password" value="<c:out value="${param.password}"/>"/></td>
 				</tr>
 				<tr>
 					<td colspan="2">

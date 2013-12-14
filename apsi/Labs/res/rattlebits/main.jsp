@@ -2,9 +2,9 @@
 <html>
 	<head>
 		<title>APSI Lab2</title>
-		<h1>Rattle Bits</h1>
 	</head>
 	<body>
+		<h1>Rattle Bits</h1>
 		<h5>Hello there!</h5>
 		<% Company c = (Company)request.getAttribute("company"); %>
 		<dl>

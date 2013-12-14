@@ -1,11 +1,10 @@
 <%@page import="java.util.List"%>
-<% List errors = (List) session.getAttribute("errors"); %>
 <html>
 	<head>
 		<title>APSI Lab2</title>
-		<h1>Rattle Bits</h1>
 	</head>
 	<body>
+		<h1>Rattle Bits</h1>
 		<a href="/rattlebits/?page=login">Login</a> <a href="/rattlebits/?page=register">Registrieren</a>
 	</body>
 </html>
