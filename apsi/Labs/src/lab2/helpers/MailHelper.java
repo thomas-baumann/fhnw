@@ -41,7 +41,7 @@ public class MailHelper {
 			props.put("mail.smtp.tls", "true");
 			props.put("mail.smtp.user", smtpUser);
 			props.put("mail.password", smtpPassword);
-			props.put("mail.debug", "true");
+			// props.put("mail.debug", "true");
 
 			javax.mail.Authenticator auth = new javax.mail.Authenticator() {
 				@Override

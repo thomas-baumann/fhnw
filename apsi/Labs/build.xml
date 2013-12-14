@@ -45,7 +45,9 @@
 				<include name="lab2/*/*.class" />
 			</classes>
 			<lib dir="${lib.dir}">
-				<include name="mysql*.jar" />
+				<include name="commons-validator-1.4.0.jar" />
+				<include name="commons-lang3-3.1.jar" />
+				<include name="mysql-connector-java-5.1.27-bin.jar" />
 				<include name="javax.mail.jar" />
 			</lib>
 			<fileset dir="${res.dir}/rattlebits">

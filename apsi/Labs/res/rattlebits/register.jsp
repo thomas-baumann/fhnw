@@ -12,7 +12,7 @@
 					<td><input type="text" name="companyname" value="${param.companyname}"/></td>
 				</tr>
 				<tr>
-					<th>Strasse</th>
+					<th>Adresse</th>
 					<td><input type="text" name="address" value="${param.address}"/></td>
 				</tr>
 				<tr>

@@ -8,6 +8,9 @@ import java.util.regex.Pattern;
 import lab2.helpers.Utility;
 import lab2.helpers.Verifiers;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.validator.routines.EmailValidator;
+
 /*
  * TODO: http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html
  * http://www.unicode.org/reports/tr18/
@@ -33,7 +36,7 @@ public class Company {
 	}
 
 	public Company(String email, String name, String address, String zipcode, String town) {
-		this(0, null, null, email, name, address, zipcode, town, null);
+		this(0, null, null, StringEscapeUtils.escapeHtml4(email), name, address, zipcode, town, null);
 	}
 
 	public Company(int id, String username, String password, String email, String name, String address, String zipcode,
@@ -155,7 +158,10 @@ public class Company {
 	}
 
 	private void validateEmail() {
-		// TODO: validate, if invalid add error message to error
+		EmailValidator v = EmailValidator.getInstance();
+		if (this.email.length() > 100 || !v.isValid(this.email)) {
+			this.errors.add("E-Mail ist nicht gültig!");
+		}
 	}
 
 	private void validateName() {
