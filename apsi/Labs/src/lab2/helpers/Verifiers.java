@@ -48,8 +48,4 @@ public final class Verifiers {
 		return notFound;
 	}
 
-	public static boolean verifyEmail(String email) {
-		return false;
-	}
-
 }
