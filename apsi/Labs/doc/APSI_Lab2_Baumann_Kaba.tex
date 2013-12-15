@@ -1,0 +1,113 @@
+\documentclass[12pt]{scrartcl}
+\usepackage[utf8]{inputenc}
+ \usepackage{fancyhdr, graphicx}
+ \usepackage[german]{babel}
+ \usepackage[scaled=0.92]{helvet}
+ \usepackage{enumitem}
+ \usepackage{parskip}
+ \usepackage{lastpage} % for getting last page number
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{color}
+\usepackage{xcolor}
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
+\newcommand\Fontvi{\fontsize{6}{7.2}\selectfont}
+
+ \renewcommand{\familydefault}{\sfdefault}
+ 
+ \fancypagestyle{firststyle}{ %Style of the first page
+ \fancyhf{}
+ \fancyheadoffset[L]{0.6cm}
+ \lhead{
+ \includegraphics[scale=0.8]{./FHNW_HT_10mm.jpg}}
+ \renewcommand{\headrulewidth}{0pt}
+ \cfoot{Thomas Baumann \& Egemen Kaba}
+}
+
+\fancypagestyle{documentstyle}{ %Style of the rest of the document
+ \fancyhf{}
+ \fancyheadoffset[L]{0.6cm}
+\lhead{
+ \includegraphics[scale=0.8]{./FHNW_HT_10mm.jpg}}
+ \renewcommand{\headrulewidth}{0pt}
+ \lfoot{Laborübung 2}
+ \cfoot{Thomas Baumann \& Egemen Kaba}
+ \rfoot{\thepage\ / \pageref{LastPage} }
+}
+
+\pagestyle{firststyle} %different look of first page
+ 
+\title{ %Titel
+Applikationssicherheit 
+\vspace{0.2cm}
+}
+
+ \begin{document}
+ \maketitle
+ \thispagestyle{firststyle}
+ \pagestyle{firststyle}
+ \begin{abstract}
+ \begin{center}
+ Laborübung 2
+ \end{center}
+ \vspace{0.5cm}
+\hrulefill
+\end{abstract}
+
+ \pagestyle{documentstyle}
+ \tableofcontents
+ \pagebreak
+\section{Ressourcen}
+\textbf{JavaServerPages}\newline
+In der View-Schicht wurden JavaServerPages verwendet. In JavaServerPages kann Java-Code ausgeführt werden. Dies wurde vor allem benutzt, um eine Liste von Fehler- bzw. Erfolgsmeldungen anzuzeigen.\\
+Eingabewerte in der View werden als Parameter im HttpServletRequest gespeichert und an das Servlet geschickt.\\
+Auf dem Rückweg werden Informationen vom Servlet ebenfalls im HttpServletRequest als Attribut gespeichert, um diese in der JSP anzuzeigen.\\
+
+\textbf{config.properties}\\
+In diesem File werden Konfigurationen für die Mail-Adresse des Absenders, für das Mail-Template sowie für den Zugang zu der Datenbank aufgelistet.\\
+
+\textbf{web.xml}\\
+Da der Servlet als WebServlet annotiert ist, wird hier bloss das Welcome-File definiert, sowie ein Security Constraint, das Tomcat angibt wo er auf HTTPS umschalten soll.\\
+
+\textbf{database.sql}\\
+Mit diesem File kann die Datenbank für die Applikation aufgesetzt werden.\\
+
+\textbf{https-einrichten.txt}\\
+In diesem File wird beschrieben wie https auf tomcat aufgesetzt werden kann.\\
+
+\textbf{build.xml}\\
+Dieses Ant Script soll das Deployment auf Tomcat automatisieren.
+
+\section{Klassen}
+Implementierungsdetails siehe Sourcecode.
+
+\textbf{RattleBitsServlet}\\
+Diese Klasse erbt von HttpServlet, ist somit die Schnittstelle der Applikation zur Aussenwelt.\\
+In diesem Servlet wird im Konstruktor der Controller, der MailHelper sowie die Datenverbindung aufgesetzt. Hier wird ebenfalls auf GET- und POST-Anfragen reagiert. Beim Zerstören des Servlets wird ebenfalls darauf geachtet, dass abhängige Objekte sauber aufgeräumt werden.\\
+
+\textbf{Controller}\\
+Der Controller verarbeitet Anfragen, die an den Servlet gesendet wurden. Dabei prüfen die Methoden jeweils als erstes, ob der Benutzer bereits eingeloggt ist. Das Resultat dieser Anfrage wird benutzt, um festzustellen, ob der Benutzer die gewünschte Aktion durchführen kann, oder auf eine andere Seite weitergeleitet werden soll.\\
+Da diverse Aktionen einen Zugriff auf die Datenbank voraussetzen, wird im Konstruktor ein Data Access Object, das CompanyDAO, mit der übergebenen Connection instanziert.\\
+Das Weiterleiten auf Seiten, wird über den RequestDispatcher geregelt. Die Strings, welche Standorte der Views angeben sind dabei als Konstanten definiert.\\
+Im Controller wird ebenfalls die Koordination zwischen diversen Komponenten, wie diversen Helpern und Utilities, mit der Applikation vorgenommen.
+
+\textbf{CompanyDAO}\\
+Das CompanyDAO ist die Schnittstelle der Applikation zur Datenbank. im Konstruktor wird deshalb auch ein Connection-Objekt übergeben, in dem Informationen enthalten sind, die für die Verbindung zur Datenbank notwendig sind.\\
+In dieser Klasse werden einige Methoden bereit gestellt, welche Objetke des Models in der Datenbank persistieren, oder mit Informationen aus der Datenbank instanzieren und zurückgeben sollen.\\
+Die Abfragen zur Datenbank werden dabei mittels PreparedStatements ausgeführt.\\
+
+\textbf{Company}\\
+Diese Klasse stellt das Model dar. Diese Klasse enthält Informationen, die aus der Datenbank stammen, oder in der Datenbank persistiert werden sollen. Sie bietet zudem Methoden an, um die enthaltenen Daten per RegEx zu validieren.\\
+
+\textbf{MailHelper}\\
+Im MailHelper werden die Properties in config.properties ausgelesen, um eine Message zu präparieren und zu senden.\\
+
+\textbf{Utility}\\
+In der Utility werden zentral statische Methoden angeboten, die an mehreren Stellen in der Applikation verwendet werden. Diese sind im Detail eine Methode zum generieren eines randomisierten Strings gemäss der Passwort-Validations-Methoden sowie eine Methode, um Strings mittels SHA-256 zu hashen.\\
+
+\textbf{Verifiers}\\
+Die Methoden dieser Klasse, haben die Aufgabe eine PLZ zu verifizieren. Damit die Verifikation nicht auf einen einzelnen Webdienst gestützt ist, wird zuerst versucht auf post.ch zu verifizieren. Schlägt diese Verifikation aufgrund von Verbindungsproblemen fehl, wird die PLZ auf postleitzahlen.ch verifiziert.\\
+Bei beiden Varianten kann die PLZ als Parameter in der URL angegeben werden. Die Antwort ist eine HTML-Page. Diese wird auf eine Meldung überprüft, welche darauf hindeutet, dass der Webdienst diese PLZ nicht gefunden hat.
+
+ \end{document}
