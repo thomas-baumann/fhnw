@@ -51,6 +51,7 @@
 				<include name="javax.mail.jar" />
 				<include name="standard.jar" />
 			</lib>
+			<fileset dir="${res.dir}" includes="*.html" />
 			<classes dir="${res.dir}" includes="*.properties"/>
 			<webinf dir="${res.dir}/rattlebits"></webinf>
 		</war>

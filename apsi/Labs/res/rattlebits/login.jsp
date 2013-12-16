@@ -6,7 +6,7 @@
 	</head>
 	<body>
 		<h1>Rattle Bits</h1>
-		<form method="POST" action="/rattlebits/?page=login" name="login">
+		<form method="POST" action="/rattlebits/apsi?page=login" name="login">
 			<table>
 				<tr>
 					<th>Benutzername</th>
@@ -19,7 +19,7 @@
 				<tr>
 					<td colspan="2">
 						<input type="submit" name="login" value="Login"/>
-						<a href="/rattlebits/?page=register">Registrieren</a>
+						<a href="/rattlebits/apsi?page=register">Registrieren</a>
 					</td>
 				</tr>
 			</table>

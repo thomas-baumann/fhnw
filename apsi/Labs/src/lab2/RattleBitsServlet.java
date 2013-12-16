@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import lab2.helpers.MailHelper;
 
-@WebServlet("/")
+@WebServlet("/apsi")
 public class RattleBitsServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -4099191990249828904L;
@@ -46,9 +46,8 @@ public class RattleBitsServlet extends HttpServlet {
 				page = "";
 			}
 			switch (page) {
-				case "login":
-					this.controller.loginGet(request, response);
-					break;
+			// case "login":
+			// break;
 				case "register":
 					this.controller.registerGet(request, response);
 					break;
@@ -62,10 +61,11 @@ public class RattleBitsServlet extends HttpServlet {
 					this.controller.logoutGet(request, response);
 					break;
 				default:
-					this.controller.indexGet(request, response);
+					this.controller.loginGet(request, response);
+					// this.controller.indexGet(request, response);
 					break;
 			}
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			response.sendError(500);
 		}
 	}
@@ -87,7 +87,7 @@ public class RattleBitsServlet extends HttpServlet {
 					this.controller.indexGet(request, response);
 					break;
 			}
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			response.sendError(500);
 		}
 	}

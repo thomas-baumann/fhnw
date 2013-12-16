@@ -32,7 +32,7 @@
 		}
 		%>
 		</ul>
-		<a href="/rattlebits/?page=logout">Logout</a>
-		<a href="/rattlebits/?page=password_reset">Passwort zur&uumlcksetzen</a>
+		<a href="/rattlebits/apsi?page=logout">Logout</a>
+		<a href="/rattlebits/apsi?page=password_reset">Passwort zur&uumlcksetzen</a>
 	</body>
 </html>
