@@ -58,37 +58,40 @@ Applikationssicherheit
  \pagestyle{documentstyle}
  \tableofcontents
  \pagebreak
-\section{Ressourcen}
-\textbf{JavaServerPages}\newline
-In der View-Schicht wurden JavaServerPages verwendet. In JavaServerPages kann Java-Code ausgeführt werden. Dies wurde vor allem benutzt, um eine Liste von Fehler- bzw. Erfolgsmeldungen anzuzeigen.\\
-Eingabewerte in der View werden als Parameter im HttpServletRequest gespeichert und an das Servlet geschickt.\\
-Auf dem Rückweg werden Informationen vom Servlet ebenfalls im HttpServletRequest als Attribut gespeichert, um diese in der JSP anzuzeigen.\\
-
-\textbf{config.properties}\\
-In diesem File werden Konfigurationen für die Mail-Adresse des Absenders, für das Mail-Template sowie für den Zugang zu der Datenbank aufgelistet.\\
-
-\textbf{web.xml}\\
-Da der Servlet als WebServlet annotiert ist, wird hier bloss das Welcome-File definiert, sowie ein Security Constraint, das Tomcat angibt wo er auf HTTPS umschalten soll.\\
-
-\textbf{database.sql}\\
-Mit diesem File kann die Datenbank für die Applikation aufgesetzt werden.\\
-
-\textbf{https-einrichten.txt}\\
-In diesem File wird beschrieben wie https auf tomcat aufgesetzt werden kann.\\
-
-\textbf{build.xml}\\
-Dieses Ant Script soll das Deployment auf Tomcat automatisieren.
-
+ 
 \section{Architektur}
+Die Architektur ist wie in Abbildung \ref{fig:Arch} implementiert. Dabei haben wir uns an das MVC-Pattern gehalten, damit die Rechte klar getrennt werden.
+
+Sämtliche Anfragen des Client-Browsers werden von einem Servlet entgegengenommen, welches auf einem Tomcat Server läuft. Dieses reicht die Anfragen entsprechend dem page-Parameter und GET bzw. POST die entsprechende Methode des Controllers weiter. Der Controller erstellt, wenn benötigt, ein Objekt der Klasse Company, dem Model, indem er entweder die erhaltenen Daten in eine neu Instanz abfüllt oder mithilfe des CompanyDAO auf die Datenbank zugreift, um von diesem ein Objekt zu erhalten. Über das DAO kann dementsprechend auch ein Company-Objekt gespeichert, bzw. nachgeführt werden. Als Datenbanksystem wird MySQL verwendet. Mit Hilfe des HttpServletRequest werden JavaServer Pages gerendert und als Antwort zurück an den Client gesendet, bzw. über den HttpServletResponse wird eine Weiterleitung ausgelöst.
 \begin{figure}
 	\centering
 	\includegraphics[width=12cm]{./Architektur.png}
 	\caption{Architektur}
 	\label{fig:Arch}
 \end{figure}
-Die Architektur wurde wie in Abbildung \ref{fig:Arch} implementiert. Dabei wurde, wie es im Folgenden weiter erläutert wird, an das MVC-Pattern gehalten, damit die Rechte klar getrennt werden.\\
-Sämtliche Aktionen weden vom Servlet bearbeitet. Der Servlet reicht diese Anfragen an den Controller weiter. Nur der Controller soll auf Komponenten zugreifen können, die nicht im Zuständigkeitsbereich der Applikation liegen, wie der PLZ-Validator oder der Mail-Helper. Der Controller wird, falls benötigt, ein Objekt der Klasse Company, dem Model, erstellt. Die Informationen dazu werden von den Benutzereingaben geholt oder aus der Datenbank. Damit der Controller mit der Datenbank kommunizieren kann, muss dieser jedoch auf ein CompanyDAO zugreifen. Dieser bietet Methoden an, welche den Informationsaustausch mit der Datenbank regeln. Als Datenbank wurde dabei eine MySQL-Datenbank genommen. 
-Der Controller kann ebenfalls einen Redirect auf eine andere Seite auslösen. Die JSP-Seiten sind dabei im WEB-INF-Ordner von Tomcat deployed worden, damit sicher gestellt werden kann, dass der Benutzer nicht direkt auf diese Seiten zugreifen kann.
+
+\section{Ressourcen}
+\textbf{JavaServerPages}\newline
+Als View-Schicht werden JavaServerPages verwendet, mit Hilfe deren auch normaler Java-Code ausgeführt werden kann. Der Java Code wird für das anzeigen der Fehler- bzw. Erfolgsmeldungen und der Daten aus der Datenbank / Model verwendet.
+
+Die vom Benutzer eingegebenen Werte in Formularen (POST-Daten) sind implizit in einer Map abgelegt, welche unter dem Namen "param" abrufbar ist. So kann zum Beispiel das Feld "`name"' mit "`\$\{param.name\}"' ausgelesen werden.
+
+Damit die JSP-Seiten nicht direkt aufgerufen werden können, sind sie im WEB-INF Verzeichnis des Tomcat Servers abgelegt.
+
+\textbf{config.properties}\\
+In dieser Java Property Datei sind die Konfigurationen für das E-Mail-Konto, den Zugriff auf die Datenbank und das Template für die Email abgespeichert. So können diese Einstellungen verändert werden, ohne dass der Code neu kompiliert werden muss.
+
+\textbf{web.xml}\\
+Da wir die Servlet Spezifikation Version 3.0 verwenden, kann das Servlet als WebServlet annotiert werden und auch der Security Constraint (Deklaration dass HTTPS verwendet werden muss) kann als Annotation festgelegt werden. Somit muss im Deployment Descriptor bloss das Welcome-File (Startseite) und die Konfiguration der Fehlerseiten definiert werden.
+
+\textbf{database.sql}\\
+Mit dieser Datei kann die Datenbank für die Applikation aufgesetzt werden. Dabei werden sowohl die benötigte Datenbank, die Tabelle mit den Spalten, als auch ein Benutzer mit den benötigten Berechtigungen erstellt.
+
+\textbf{https-einrichten.txt}\\
+In dieser Datei wird beschrieben, wie https auf einem Tomcat Server aufgesetzt werden kann.
+
+\textbf{build.xml}\\
+Das Ant Script automatisiert das Builden und das Deployment auf den Tomcat Server.
 
 \section{Klassen}
 Implementierungsdetails siehe Sourcecode.
