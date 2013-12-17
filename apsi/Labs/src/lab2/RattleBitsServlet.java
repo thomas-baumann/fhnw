@@ -17,8 +17,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lab2.helpers.MailHelper;
-
 @WebServlet("/apsi")
 @ServletSecurity(value = @HttpConstraint(transportGuarantee = TransportGuarantee.CONFIDENTIAL))
 public class RattleBitsServlet extends HttpServlet {
@@ -31,7 +29,7 @@ public class RattleBitsServlet extends HttpServlet {
 		super();
 
 		Properties properties = new Properties();
-		InputStream stream = MailHelper.class.getClassLoader().getResourceAsStream("config.properties");
+		InputStream stream = RattleBitsServlet.class.getClassLoader().getResourceAsStream("config.properties");
 		properties.load(stream);
 		stream.close();
 		String dbUrl = properties.getProperty("db.url");
