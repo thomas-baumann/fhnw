@@ -81,10 +81,11 @@ public class Controller {
 			List<String> errors = c.validate();
 			if (errors.size() == 0) {
 				int counter = 1;
-				while (this.companyDAO.getCompanyByUsername(c.getName() + counter) != null) {
+				String username = c.getName().replace(' ', '_');
+				while (this.companyDAO.getCompanyByUsername(username + counter) != null) {
 					counter++;
 				}
-				c.setUsername(c.getName() + counter);
+				c.setUsername(username + counter);
 				String password = Utility.generateRandomString(12);
 				c.setPassword(password);
 				if (!MailHelper.sendMail(c.getEmail(), c.getUsername(), c.getPasswordNotHashed())) {
