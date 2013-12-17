@@ -6,7 +6,7 @@
 	</head>
 	<body>
 		<h1>Rattle Bits</h1>
-		<form method="POST" action="/rattlebits/?page=register" name="register">
+		<form method="POST" action="/rattlebits/apsi?page=register" name="register">
 			<table>
 				<tr>
 					<th>Firmenname</th>
@@ -48,5 +48,6 @@
 		}
 		%>
 		</ul>
+		<a href="/rattlebits/apsi?page=login">Login</a>
 	</body>
 </html>
