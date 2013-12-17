@@ -3,7 +3,7 @@ package lab2.helpers;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class Utility {
+public final class Utility {
 
 	public static String generateRandomString(int size) {
 		StringBuilder build = new StringBuilder();

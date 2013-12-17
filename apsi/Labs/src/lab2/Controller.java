@@ -16,7 +16,7 @@ import lab2.helpers.MailHelper;
 import lab2.helpers.Utility;
 import lab2.model.Company;
 
-public class Controller {
+public final class Controller {
 
 	private final static String MESSAGE_SESSION = "message";
 

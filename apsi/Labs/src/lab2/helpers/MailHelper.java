@@ -13,7 +13,7 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-public class MailHelper {
+public final class MailHelper {
 
 	public static boolean sendMail(String email, String nickname, String password) {
 		try {

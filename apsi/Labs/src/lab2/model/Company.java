@@ -12,10 +12,10 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 
 /*
- * TODO: http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html
+ * http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html
  * http://www.unicode.org/reports/tr18/
  */
-public class Company {
+public final class Company {
 
 	private final List<String> errors = new ArrayList<>();
 

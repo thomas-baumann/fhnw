@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 @WebServlet("/apsi")
 @ServletSecurity(value = @HttpConstraint(transportGuarantee = TransportGuarantee.CONFIDENTIAL))
-public class RattleBitsServlet extends HttpServlet {
+public final class RattleBitsServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -4099191990249828904L;
 	private Controller controller;

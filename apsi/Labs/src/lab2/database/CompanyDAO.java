@@ -7,7 +7,7 @@ import java.sql.SQLException;
 
 import lab2.model.Company;
 
-public class CompanyDAO {
+public final class CompanyDAO {
 
 	private Connection connection;
 
