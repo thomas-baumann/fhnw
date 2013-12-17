@@ -20,7 +20,6 @@ public class Controller {
 
 	private final static String MESSAGE_SESSION = "message";
 
-	private final static String INDEX = "WEB-INF/index.jsp";
 	private final static String LOGIN = "WEB-INF/login.jsp";
 	private final static String MAIN = "WEB-INF/main.jsp";
 	private final static String PASSWORDRESET = "WEB-INF/password_reset.jsp";
@@ -30,15 +29,6 @@ public class Controller {
 
 	public Controller(Connection connection) {
 		this.companyDAO = new CompanyDAO(connection);
-	}
-
-	public void indexGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
-			SQLException {
-		if (this.isLoggedin(request)) {
-			this.redirectToMain(request, response);
-		} else {
-			request.getRequestDispatcher(INDEX).forward(request, response);
-		}
 	}
 
 	public void mainGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
@@ -214,11 +204,11 @@ public class Controller {
 		return c != null && hash.equals(c.getHashCode());
 	}
 
-	private void redirectToMain(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public void redirectToMain(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		this.redirect(request, response, "main");
 	}
 
-	private void redirectToLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public void redirectToLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		this.redirect(request, response, "login");
 	}
 

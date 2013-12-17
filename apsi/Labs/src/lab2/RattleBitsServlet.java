@@ -46,8 +46,6 @@ public class RattleBitsServlet extends HttpServlet {
 				page = "";
 			}
 			switch (page) {
-			// case "login":
-			// break;
 				case "register":
 					this.controller.registerGet(request, response);
 					break;
@@ -62,7 +60,6 @@ public class RattleBitsServlet extends HttpServlet {
 					break;
 				default:
 					this.controller.loginGet(request, response);
-					// this.controller.indexGet(request, response);
 					break;
 			}
 		} catch (Throwable e) {
@@ -84,7 +81,7 @@ public class RattleBitsServlet extends HttpServlet {
 					this.controller.passwordResetPost(request, response);
 					break;
 				default:
-					this.controller.indexGet(request, response);
+					this.controller.redirectToLogin(request, response);
 					break;
 			}
 		} catch (Throwable e) {
