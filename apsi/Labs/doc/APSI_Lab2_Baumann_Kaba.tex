@@ -78,6 +78,9 @@ Die vom Benutzer eingegebenen Werte in Formularen (POST-Daten) sind implizit in 
 
 Damit die JSP-Seiten nicht direkt aufgerufen werden können, sind sie im WEB-INF Verzeichnis des Tomcat Servers abgelegt.
 
+\textbf{error404.html / error500.html}\\
+Eigene Fehlerseiten, die bei Fehlern im Servlet angezeigt werden.
+
 \textbf{config.properties}\\
 In dieser Java Property Datei sind die Konfigurationen für das E-Mail-Konto, den Zugriff auf die Datenbank und das Template für die Email abgespeichert. So können diese Einstellungen verändert werden, ohne dass der Code neu kompiliert werden muss.
 
@@ -91,38 +94,39 @@ Mit dieser Datei kann die Datenbank für die Applikation aufgesetzt werden. Dabe
 In dieser Datei wird beschrieben, wie https auf einem Tomcat Server aufgesetzt werden kann.
 
 \textbf{build.xml}\\
-Das Ant Script automatisiert das Builden und das Deployment auf den Tomcat Server.
+Das Ant-Script automatisiert das Compilieren, das Erstellen der war-Datei und das Deployment auf den Tomcat Server.
 
 \section{Klassen}
 Implementierungsdetails siehe Sourcecode.
 
 \textbf{RattleBitsServlet}\\
 Diese Klasse erbt von HttpServlet, ist somit die Schnittstelle der Applikation zur Aussenwelt.\\
-In diesem Servlet wird im Konstruktor der Controller, der MailHelper sowie die Datenverbindung aufgesetzt. Hier wird ebenfalls auf GET- und POST-Anfragen reagiert. Beim Zerstören des Servlets wird ebenfalls darauf geachtet, dass abhängige Objekte sauber aufgeräumt werden.\\
+In diesem Servlet wird im Konstruktor der Controller sowie die Datenverbindung aufgesetzt. Hier wird ebenfalls auf GET- und POST-Anfragen reagiert und auf den Controller delegiert. Beim Zerstören des Servlets wird die Datenverbindung beendet.
 
 \textbf{Controller}\\
-Der Controller verarbeitet Anfragen, die an den Servlet gesendet wurden. Dabei prüfen die Methoden jeweils als erstes, ob der Benutzer bereits eingeloggt ist. Das Resultat dieser Anfrage wird benutzt, um festzustellen, ob der Benutzer die gewünschte Aktion durchführen kann, oder auf eine andere Seite weitergeleitet werden soll.\\
+Der Controller verarbeitet Anfragen, die an den Servlet gesendet wurden. Dabei existieren für jede Seite und für jeden Typ einer Anfrage eine entsprechende Methode. Diese prüfen jeweils als erstes, ob der Benutzer bereits eingeloggt ist. Anhand diesem Resultat wird festgestellt, ob der Benutzer die gewünschte Aktion durchführen kann, oder auf eine andere Seite weitergeleitet werden soll.\\
 Da diverse Aktionen einen Zugriff auf die Datenbank voraussetzen, wird im Konstruktor ein Data Access Object, das CompanyDAO, mit der übergebenen Connection instanziert.\\
-Das Weiterleiten auf Seiten, wird über den RequestDispatcher geregelt. Die Strings, welche Standorte der Views angeben sind dabei als Konstanten definiert.\\
-Im Controller wird ebenfalls die Koordination zwischen diversen Komponenten, wie diversen Helpern und Utilities, mit der Applikation vorgenommen.
+Das Rendern der Seiten, wird über den RequestDispatcher geregelt. Die Strings, welche den Pfad der Views repräsentieren sind dabei als Konstanten definiert.\\
+Im Controller wird neben der allgemeinen Koordination ebenfalls das Auslösen der Validierung, des Ladens und Speichern von der Datenbank und das senden der E-Mail vorgenommen.
 
 \textbf{CompanyDAO}\\
-Das CompanyDAO ist die Schnittstelle der Applikation zur Datenbank. im Konstruktor wird deshalb auch ein Connection-Objekt übergeben, in dem Informationen enthalten sind, die für die Verbindung zur Datenbank notwendig sind.\\
-In dieser Klasse werden einige Methoden bereit gestellt, welche Objetke des Models in der Datenbank persistieren, oder mit Informationen aus der Datenbank instanzieren und zurückgeben sollen.\\
-Die Abfragen zur Datenbank werden dabei mittels PreparedStatements ausgeführt.\\
+Das CompanyDAO ist die Schnittstelle der Applikation zur Datenbank. Im Konstruktor wird deshalb auch eine Connection-Instanz übergeben, in dem Informationen enthalten sind, die für die Verbindung zur Datenbank notwendig sind.\\
+Weiter werden einige Methoden bereit gestellt, welche Objekte des Models in der Datenbank persistieren oder mit Informationen aus der Datenbank instanzieren und zurückgeben.\\
+Die Abfragen zur Datenbank werden dabei mittels PreparedStatements ausgeführt.
 
 \textbf{Company}\\
-Diese Klasse stellt das Model dar. Diese Klasse enthält Informationen, die aus der Datenbank stammen, oder in der Datenbank persistiert werden sollen. Sie bietet zudem Methoden an, um die enthaltenen Daten per RegEx zu validieren.\\
+Diese Klasse stellt das Model dar. Diese Klasse enthält Informationen, die aus der Datenbank stammen, oder in der Datenbank persistiert werden sollen. Dabei sind alle Felder, die nicht geändert werden sollen als final deklariert und haben dementsprechend auch keinen setter.\\
+Sie bietet zudem Methoden an, um die enthaltenen Daten per RegEx zu validieren.
 
 \textbf{MailHelper}\\
-Im MailHelper werden die Properties in config.properties ausgelesen, um eine Message zu präparieren und zu senden.\\
+Mit Hilfe dieser Klasse kann eine E-Mail versendet werden, dabei wird die Library javax.mail verwendet. Die Konfiguration für den SMTP-Server und das Template für die Nachricht wird dabei aus der Java Property Datei gelesen.
 
 \textbf{Utility}\\
-In der Utility werden zentral statische Methoden angeboten, die an mehreren Stellen in der Applikation verwendet werden. Diese sind im Detail eine Methode zum generieren eines randomisierten Strings gemäss der Passwort-Validations-Methoden sowie eine Methode, um Strings mittels SHA-256 zu hashen.\\
+In der Utility werden zentral statische Methoden angeboten, die an mehreren Stellen in der Applikation verwendet werden. Diese sind im Detail eine Methode zum generieren eines randomisierten Strings gemäss der Passwort-Validations-Methoden sowie eine Methode, um Strings mittels SHA-256 zu hashen. Dabei wird der Hash noch so verändert, dass dieser nur aus Zeichen aus dem Hexadezimalsystem besteht.
 
 \textbf{Verifiers}\\
 Die Methoden dieser Klasse, haben die Aufgabe eine PLZ zu verifizieren. Damit die Verifikation nicht auf einen einzelnen Webdienst gestützt ist, wird zuerst versucht auf post.ch zu verifizieren. Schlägt diese Verifikation aufgrund von Verbindungsproblemen fehl, wird die PLZ auf postleitzahlen.ch verifiziert.\\
-Bei beiden Varianten kann die PLZ als Parameter in der URL angegeben werden. Die Antwort ist eine HTML-Page. Diese wird auf eine Meldung überprüft, welche darauf hindeutet, dass der Webdienst diese PLZ nicht gefunden hat.
+Bei beiden Varianten kann eine GET-Anfrage gesendet werden, welche mit einer HTML-Seite antworten. Diese wird auf eine Meldung überprüft, welche darauf hindeutet, dass diese PLZ nicht existiert.
 
 \section{Sicherheitsmechanismen}
 \subsection{Benutzereingaben}
