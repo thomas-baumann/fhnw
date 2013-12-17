@@ -2,12 +2,16 @@ package lab2;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.HttpConstraint;
+import javax.servlet.annotation.ServletSecurity;
+import javax.servlet.annotation.ServletSecurity.TransportGuarantee;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -16,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import lab2.helpers.MailHelper;
 
 @WebServlet("/apsi")
+@ServletSecurity(value = @HttpConstraint(transportGuarantee = TransportGuarantee.CONFIDENTIAL))
 public class RattleBitsServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -4099191990249828904L;
@@ -62,7 +67,7 @@ public class RattleBitsServlet extends HttpServlet {
 					this.controller.loginGet(request, response);
 					break;
 			}
-		} catch (Throwable e) {
+		} catch (SQLException e) {
 			response.sendError(500);
 		}
 	}
@@ -84,7 +89,7 @@ public class RattleBitsServlet extends HttpServlet {
 					this.controller.redirectToLogin(request, response);
 					break;
 			}
-		} catch (Throwable e) {
+		} catch (SQLException | NoSuchAlgorithmException e) {
 			response.sendError(500);
 		}
 	}

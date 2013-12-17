@@ -5,21 +5,24 @@
 	version="3.0">
 
 	<error-page>
-	    <location>/error.html</location>
+		<error-code>404</error-code>
+	    <location>/error404.html</location>
+	</error-page>
+	<error-page>
+		<error-code>500</error-code>
+	    <location>/error500.html</location>
+	</error-page>
+	<error-page>
+		<exception-type>java.lang.Throwable</exception-type>
+	    <location>/error500.html</location>
+	</error-page>
+	<error-page>
+	    <location>/error500.html</location>
 	</error-page>
 	
 	<welcome-file-list>
 		<welcome-file>apsi</welcome-file>
 	</welcome-file-list>
 
-	<security-constraint>
-		<web-resource-collection>
-			<web-resource-name>/rattlebits</web-resource-name>
-			<url-pattern>/*</url-pattern>
-		</web-resource-collection>
-		<user-data-constraint>
-			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
-		</user-data-constraint>
-	</security-constraint>
 
 </web-app>
