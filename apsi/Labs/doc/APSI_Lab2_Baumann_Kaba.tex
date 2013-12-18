@@ -15,6 +15,8 @@
 \newcommand\Fontvi{\fontsize{6}{7.2}\selectfont}
 
  \renewcommand{\familydefault}{\sfdefault}
+\usepackage[hyphens]{url}
+\usepackage[hidelinks]{hyperref}
  
  \fancypagestyle{firststyle}{ %Style of the first page
  \fancyhf{}
@@ -119,7 +121,7 @@ Diese Klasse stellt das Model dar. Diese Klasse enthält Informationen, die aus 
 Sie bietet zudem Methoden an, um die enthaltenen Daten per RegEx zu validieren.
 
 \textbf{MailHelper}\\
-Mit Hilfe dieser Klasse kann eine E-Mail versendet werden, dabei wird die Library javax.mail verwendet. Die Konfiguration für den SMTP-Server und das Template für die Nachricht wird dabei aus der Java Property Datei gelesen.
+Mit Hilfe dieser Klasse kann eine E-Mail versendet werden, dabei wird die Bibliothek javax.mail verwendet. Die Konfiguration für den SMTP-Server und das Template für die Nachricht wird dabei aus der Java Property Datei gelesen.
 
 \textbf{Utility}\\
 In der Utility werden zentral statische Methoden angeboten, die an mehreren Stellen in der Applikation verwendet werden. Diese sind im Detail eine Methode zum generieren eines randomisierten Strings gemäss der Passwort-Validations-Methoden sowie eine Methode, um Strings mittels SHA-256 zu hashen. Dabei wird der Hash noch so verändert, dass dieser nur aus Zeichen aus dem Hexadezimalsystem besteht.
@@ -130,52 +132,55 @@ Bei beiden Varianten kann eine GET-Anfrage gesendet werden, welche mit einer HTM
 
 \section{Sicherheitsmechanismen}
 \subsection{Benutzereingaben}
-In der ersten Sicherheitsstufe werden HTML-Zeichen bereits in der View escaped. Dies wird dadurch erreicht, dass JSTL (Java ServerPages Template Language) ein Tag anbietet, welches eine Benutzereingabe als Information kennzeichnet, welches in weiteren Schritten von weiteren Komponenten beansprucht wird.\\
-Die zweite Sicherheitsstufe wurde im Model implementiert. Dort werden sämtliche Benutzereingaben validiert bevor sie weiter verwendet werden. Die Validation erfolgt durch Regular Expressions, welche von der Aufgabenstellung vorgegeben wurden.\\
-Der dritte Schritt erfolgt vor dem Persistieren der Benutzereingaben in der Datenbank. Im CompanyDAO werden Benutzereingaben über PreparedStatements in der Datenbank gespeichert. Somit kann sicher gestellt werden, dass Informationen in der Datenbank garantiert sauber sind.\\
-Beim Anzeigen der Informationen aus der Datenbank werden keine Sicherheitsmassnahmen getroffen, da davon ausgegangen wird, dass dank der zahlreichen Massnahmen beim Speichern, die Werte in der Datenbank garantiert sauber sind. Dadurch kann auch sichergestellt werden, dass SQL-Injection bzw. XSS-Attacken abgefangen werden können.\\
-Auf spezielle Benutzereingaben wie der E-Mail und der PLZ wird in seperaten Kapiteln eingegangen.
+Die Benutzereingaben werden im Controller aus dem HttpServletRequest geholt und im Model gespeichert. Dieses Model wird dann jeweils immer validiert, bevor etwas weiteres mit den Daten gemacht wird. Die Validation findet dabei mithilfe von Regulären Ausdrücken statt. Wenn die Daten nicht korrekt sind werden sie nicht weiterverwendet und eine Fehlermeldung an den Client gesendet.\\
+Da gemäss Aufgabenstellung keine Sicherheitskritische Zeichen zugelassen sind, müssen diese auch nicht bearbeitet werden. Wenn solche (z.B. $'$ oder $<$) gültig wären, müssten diese noch ersetzt bzw. escaped werden.\\
+Damit an der Datenbank keine SQL-Injection Angriffe vorgenommen werden können, werden die validen Benutzereingaben mit Hilfe von PreparedStatements verarbeitet.\\
+Um die Benutzerfreundlichkeit zu unterstützen, werden alle Benutzereingaben bei Fehlermeldungen wieder angezeigt. Damit ein Benutzer auf sich selber keine XSS-Attacke ausführen kann, bzw. die Seite nicht falsch dargestellt wird. Werden die Benutzereingaben mit Hilfe der JavaServer Pages Standard Tag Library ($jstl/core:out$) bearbeitet. Dabei werden verbotene Zeichen durch die entsprechenden HTML-Zeichen ersetzt.\\
+Beim Anzeigen von Daten aus der Datenbank werden keine Vorkehrungen getroffen, da davon ausgegangen wird, dass nur sichere Daten, welche unsere gespeicherten Daten sind, in der Datenbank abgelegt werden.
 
 \subsection{E-Mail}
-Die E-Mail-Validierung wurde durch die Klasse E-Mail-Validator im Package org.apache.commons gelöst. Dieser implementiert eine genügend gute Lösung, um die meisten E-Mails validieren zu können. Eine andere Möglichkeit wäre gewesen den RegEx-String zu kopieren, der von http://www.ex-parrot.com/~pdw/Mail-RFC822-Address.html beschrieben wird. Diese Lösung implementiert den RFC822-Standard und wurde von einem Perl-Modul generiert. Wir haben uns jedoch auf eine rein Java-basierte Lösung entschieden, welches gewartet und auf dem neuesten Stand gehalten wird.\\
-Die E-Mail-Verifizierung konnte nicht implementiert werden. Wir haben keine Lösung gefunden, welcher eine 100\% Verifizierung einer E-Mail-Adresse erlaubt hätte. Das Hauptproblem bestand darin, dass die meisten Mail-Server eine Antwort auf die E-Mail-Verifikation per Default verweigern. Dies ist auch verständlich, da sonst Spammer diese Information für ihre Zwecke ausnutzen könnten.\\
-Das Versenden von E-Mails werden über das Package javax.mail.* in einem Helper gelöst.
+Die E-Mail-Validierung wird durch die Klasse EmailValidator der Apache Commons Bibliothek gelöst. Diese überprüft dabei nur, ob die E-Mail Adresse syntaktisch korrekt ist.\\
+In unserer Lösung ist die E-Mail-Verifizierung nicht implementiert, da es keine 100\%ige Möglichkeit gibt im Voraus zu bestimmen, ob eine E-Mail Adresse existiert. Eine Möglichkeit wäre die "`Callback verification"' (\url{http://en.wikipedia.org/wiki/Callback_verification}), dabei wird eine Anfrage an den Mailserver gesendet und dieser sollte eine Antwort zurückgeben, ob die Adresse existiert. Die ist jedoch bei vielen Mailservern deaktiviert, damit dies nicht für SPAM-Mail missbraucht werden kann. Die zweite Möglichkeit wäre den SMTP-Befehl "`$VRFY$"' an den Mailserver zusenden, welcher genau für diesen Zweck gedacht wäre, aber auch dieser ist bei vielen Servern deaktiviert.\\
+Das Versenden von E-Mails wird schlussendlich durch den MailHelper übernommen, welcher intern javax.mail verwendet.
 
 \subsection{PLZ}
-Die PLZ-Validierung wird wie die restlichen Benutzereingaben per RegEx validiert.\\
-Die PLZ-Verifizierung erfolgt durch zwei Webdienste. Der erste Webdienst, der angesteuert wird, ist derjenige von post.ch. Gibt es bei der Verbindung zu diesem Webdienst ein Problem, wird auf den Webdienst von postleitzahlen.ch zurückgegriffen. Bei beiden Varianten können Parameter über die URL verschickt werden. Die Antwort wird anschliessend auf ein Stichwort untersucht, welches indiziert, dass die PLZ nicht gefunden wurde. Durch die zwei Webdienst wird sichergestellt, dass die Verfügbarkeit möglichst auf einem hohen Level gehalten werden kann.
+Die PLZ-Validierung wird wie die restlichen Benutzereingaben per Regulären Ausdruck validiert.\\
+Die PLZ-Verifizierung erfolgt durch einen von zwei Webdienste. Der erste Webdienst der angesteuert wird, ist derjenige von post.ch. Gibt es bei der Verbindung zu diesem Webdienst ein Problem, wird auf den Webdienst von postleitzahlen.ch zurückgegriffen. Bei beiden Varianten können eine GET-Anfrage durchgeführt werden, da die PLZ vorgängig per Regulären Ausdruck validiert wurde enthält sie genau 4 Zahlen und kann somit direkt übergeben werden. Die Antwort wird anschliessend auf ein Stichwort untersucht, welches indiziert, dass die PLZ nicht gefunden wurde. Durch die zwei Webdienst wird sichergestellt, dass die Verfügbarkeit möglichst auf einem hohen Level gehalten werden kann.\\
+Eine optimalere Lösung, jedoch nicht gemäss Aufgabenstellung, wäre alle PLZ lokal in einer Datenbank zu speichern. Somit müsste nicht jedes mal eine weitere Webseite aufgerufen werden, welche eine zusätzliche Verzögerung verursacht. Diese Datenbank müsste etwa jährlich mit den neuesten Daten befüllt werden,
 
 \subsection{HTTPS}
-\textbf{In Tomcat}\\
-Die Installation von HTTPS haben wir wie folgt gelöst:
+Damit ein Tomcat Server HTTPS unterstütz, muss dieser zuerst konfiguriert werden, dabei müssen zwei Schritte vorgenommen werden:
 \begin{itemize}
-	\item Generieren eines Keystores mittels keytool
-	\item Suchen des Eintrags für den Connector mit dem Port 8443 in conf/server.xml vom Tomcat
-	\item Ergänzen dieses Eintrags durch die Attribute keystoreFile, welches den Standort des Keystores angibt, und keystorePass, welches das Passwort des Keystores angibt.
+	\item Generieren eines Keystores mittels keytool von Java
+	\item Konfigurationsdatei des Tomcat Servers anpassen, dass er den Keystore findet und öffnen kann
 \end{itemize}
-Eine detaillierte Beschreibung ist im rsc-Ordner der Applikation zu finden.\\
-Nach der Installation ist ein Keystore generiert, sowie der Connector, welches für HTTPS zuständig ist, konfiguriert worden, so dass dieser den Keystore verwendet wird.\\
-In der Applikation wird im File web.xml ein SecurityConstraint für eine Web-Ressource mit einem User-Data-Constraint erstellt. Als Web-Ressource wurde die gesamte Applikation und als User-Data-Constraint CONFIDENTIAL definiert worden. Dies bedeutet, dass Tomcat automatisch auf HTTPS umstellt, wenn eine Seite der Applikation aufgerufen wurde. Mit dieser Lösung können wir jedoch nicht erst beim Login auf HTTPS umstellen, da der SecurityConstraint keine URL-Parameter, auf denen die Navigation aufbaut, unterstützt. Diese Lösung hat aber den Vorteil, dass sämtliche Kommunikation mit der Applikation über HTTPS erfolgt, was aus unserer Sicht die Sicherheit erhöht.\\
-Eine weitere Lösungsmöglichkeit wäre gewesen, Filter zu implementieren. Bei Filtern müsste jedoch manuell implementiert werden, auf welchen Seiten eine Umstellung auf HTTPS nötig gewesen wäre. In der momentanen Lösung kann durch ein SecurityConstraint in einem File, welches für die Konfiguration von Tomcat gedacht ist, diese Umstellung definiert und bei Änderungen zentral und einfach geändert werden.
+Eine detaillierte Beschreibung ist in der Datei rsc/https-einrichten.txt der Applikation zu finden.
+
+Damit der Tomcat Server automatisch eine HTTPS-Verbindung verwendet (SecurityConstraint), muss dies im Deployment Descriptor (web.xml) definiert werden, oder das Servlet kann mit $@ServletSecurity$ annotiert werden, was in unserem Fall gemacht wurde. Damit müssen alle Verbindungen zu unserem Servlet über HTTPS laufen, sollte eine Anfrage über die ungesicherte Leitung HTTP kommen, so wird diese automatisch umgeleitet.\\
+Da wir ein einziges Servlet implementiert haben, ist es mit dieser Lösung nicht möglich nur bestimmte Seiten über HTTPS laufen zu lassen. (Es kann kein URL-Mapping auf ein Query vorgenommen werden.) Diese Lösung hat aber den Vorteil, dass sämtliche Kommunikation mit der Applikation über HTTPS erfolgt, was die Sicherheit erhöht.\\
+Eine andere Lösungsmöglichkeit wäre gewesen, einen Filter zu implementieren, der bei jeder Anfrage aufgerufen wird. Dieser müsste jedesmal kontrollieren, welche Seite aufgerufen wurde und ob sie, wenn benötigt über HTTPS aufgerufen wurde. In diesem Fall darf kein SecurityConstraint definiert sein und der Programmierer muss selber schauen, dass wirklich HTTPS verwendet wird.\\
+Eine weitere Möglichkeit wäre für jede Seite ein eigenes Servlet zu erstellen und für jedes einen SecurityConstraint zu definieren. Damit kann für jede Seite einzeln entschieden werden, ob sie über HTTPS laufen muss oder nicht.
 
 \subsection{Bedrohungsmodell Datenbank}
-Falls die Applikation lokal betrieben wird, kann die Datenbank leicht geschützt werden, in dem die Datenbank im lokalen Modus konfiguriert ist, also keine Anfragen von ausserhalb beantwortet.\\
-Falls die Applikaiton online betrieben wird, kann die Datenbank so konfiguriert werden, dass sie nur auf bestimmte IP-Adressen antwortet. Dies wäre die IP-Adresse des Servers, auf dem Tomcat läuft.\\
-Eine weitere Bedrohung stellt SQL-Injection dar. Dies wird jedoch durch die diversen Sicherheitsmechansimen, die im Kapitel über Benutzereingaben beschrieben werden, verunmöglicht.
+Für die Applikation wurde ein neuer Benutzer erstellt, welcher nur $SELECT$, $INSERT$, $UPDATE$ und $DELETE$ auf der eigens dafür erstellten Datenbank durchführen kann (siehe rsc/database.sql). Somit ist es unmöglich auf andere Datenbanken zuzugreifen, oder eine Tabellenstruktur zu bearbeiten.\\
+Weiter sollte das Datenbanksystem so konfiguriert werden, dass nur vom lokalen System zugegriffen werden kann. Somit ist es unmöglich von einem entfernten Computer direkt auf das Datenbanksystem zuzugreifen. Sollte der Webserver auf einem anderem Rechner laufen, so sollte nur für genau diesen Computer eine Berechtigung gegeben werden.\\
+Eine weitere Bedrohung stellt SQL-Injection dar. Dies wird jedoch durch die Sicherheitsmechanismen, die im Kapitel über Benutzereingaben beschrieben werden, verunmöglicht.
 
 \subsection{Strategie Login-Versuche}
-Unsere Strategie für mehrmalige falsche Login-Versuche umfasst eine Liste, die im Controller verwaltet wird. Diese Liste wird bei jedem Login-Versuch ergänzt. Diese Liste speichert in jedem Eintrag, welcher Nutzer, identifiziert durch den Benutzernamen, sich einloggen wollte, der wievielte Versuche es war und einem Zeitstempel, wann er zuletzt probiert hat, sich einzuloggen.
-Ab einer gewissen Anzahl von Versuchen wird der Benutzer für weitere Versuche gesperrt und bekommt eine Meldung angezeigt.\\
-Eine private finale Variable wird erstellt, um zu definieren, nach welcher Zeit ein Benutzer wieder einen Versuch hat sich einzuloggen. Bei einem Eintrag in der Liste wird überprüft, ob der Zeitstempel + diese Variable in der Zukunft liegt. Falls ja, wird der Counter für die Versuche raufgezählt, falls nicht, wird der Eintrag in dieser Liste gelöscht.\\
+Unsere Strategie für mehrmalige falsche Login-Versuche umfasst zwei zusätzliche Spalten in der companies Tabelle. Die erste Spalte enthält die Anzahl Fehlversuche seit dem letzten login und die zweite Spalte enthält einen optionalen Zeitstempel, welcher anzeigt, bis wann die Benutzeranmeldung gesperrt ist.\\
+Meldet sich ein Benutzer erfolgreich an, so wird der Zähler auf null gesetzt und der Zeitstempel gelöscht. Findet ein Fehlversuch statt, so wird der Zähler um eins erhöht und ab einem Wert von beispielsweise drei, wird ein Zeitstempel gesetzt, der eine Minute in der Zukunft liegt. Somit ist es während der nächsten Minute nicht möglich sich anzumelden und der Benutzer bekommt dementsprechend eine Nachricht.
 
 \subsection{Login und Identifikation}
-Der Benutzername wird aus dem Firmennamen, sowie einer fortlaufenden Zahl generiert.\\
-Das Passwort ist ein randomisierter String, welches zuerst per SHA-256 gehasht und später in HEX konvertiert wird. Die Konvertierung erhöht die Sicherheit des Passworts nochmal, falls ein Angreifer diesen knacken will. Der Benutzer erhält den randomisierten String. In der Datenbank wird das gehashte und konvertierte Passwort gespeichert.\\
-Bei erfolgreichem Login, wird dem User eine Id zugewiesen. Dieser entspricht der Id in der Datenbank, welche bei der Registrierung einer Firma angelegt wird. Zusätzlich wird dem User ein randomisierter String zugewiesen, welcher während dem Login in der Datenbank gespeichert wird. Beide Informationen werden in der Session des Nutzers gespeichert.\\
-Mit diesen Informationen kann fest gestellt werden, ob der Nutzer eingeloggt ist und ob dieser Nutzer, Informationen in der Session manipuliert hat. Denn ist die Kombination aus Id und String nicht in der Datenbank vorhanden, wird dem Nutzer die Zugriff auf weitere Seiten innerhalb des geschützten Bereichs verweigert.
+Der Benutzername wird aus dem Firmennamen und einer angehängten Zahl generiert. Die erste Firma erhält dabei als Zahl die eins. Eine zweite Firma mit dem \textbf{gleichen} Namen erhält den Zusatz zwei. Beim generieren der Zahl, wird jedesmal in der Datenbank kontrolliert, ob der Benutzername bereits existiert.\\
+Das Passwort ist ein randomisierter String, welches zuerst per SHA-256 gehasht und dann in Zeichen aus dem Hexadezimalsystem konvertiert wird. Die Konvertierung erhöht die Sicherheit der gespeicherten Passwörter nochmals, falls ein Angreifer zugriff auf die verschlüsselten Passwörter hat und diese knacken will. Der Benutzer erhält den randomisierten String per E-Mail zugesendet. In der Datenbank wird das gehashte und konvertierte Passwort gespeichert.\\
+Wenn sich ein Benutzer anmeldet, so wird der Benutzer mit dem angefordertem Benutzernamen aus der Datenbank ausgelesen und erst im Controller, also im Java-Code, wird das übereinstimmen des Passwortes überprüft. Dies ist eine weitere Sicherheitsmassnahme gegen eine SQL-Injection. Bei erfolgreichem Login, erhält der User eine Id zugewiesen. Diese entspricht der Id in der Datenbank, welche bei der Registrierung einer Firma angelegt wird (Primarykey mit autoincrement). Zusätzlich wird dem User ein randomisierter String, mit der Länge von 64 Zeichen (a-z, A-Z, 0-9), zugewiesen, welcher bei jedem Login neu generiert wird und in der Datenbank gespeichert wird. Beide Informationen werden in der Session des Nutzers gespeichert. Loggt sich der Benutzer aus, so werden die Session Daten und der String in der Datenbank gelöscht.\\
+Mit diesen Informationen kann festgestellt werden, ob der Nutzer eingeloggt ist und ob dieser Nutzer, Informationen in der Session manipuliert hat. Denn ist die Kombination aus Id und String nicht in der Datenbank vorhanden, wird dem Nutzer die Zugriff auf weitere Seiten innerhalb des geschützten Bereichs verweigert.
 
 \subsection{Interne Fehler}
-Treten jegliche Fehler innerhalb des Servlets auf, welche von der Applikation verursacht worden sind, werden diese nicht an den Benutzer direkt weitergeleitet. Ein Mapping im File web.xml verweist bei einer Fehlermeldung auf eine eigene Fehlerseite. Diese Massnahme wurde getroffen, damit der Benutzer keine Informationen über Fehler in der Ausführung der Applikation erhalten kann, welche allfällige konkrete Implementierungsdetails verraten. Durch das mappen auf einen universellen Fehlercode wird zudem sicher gestellt, dass auch in Zukunft diese Weiterleitung funktioniert und nicht durch neuere Versionen ausgehebelt wird.
+Treten jegliche Fehler innerhalb des Servlets auf, werden diese nicht die original Fehlermeldungen mit dem Stacktrace an den Benutzer weitergeleitet, sondern eigene definierte Fehlermeldungen angezeigt.\\
+Ein Mapping im Deployment Descriptor verweist je nach Fehlermeldung auf eine andere Fehlerseite. Dabei unterscheiden wir zwischen einem 404 Fehler und allen anderen Fehler, die wir als 500 Fehler darstellen. Diese Massnahme wurde getroffen, damit der Benutzer keine Informationen über das System erhalten kann und somit einem Angreifer helfen würde.
 
+\subsection{viele Benutzer}
+Da die Applikation stateless ist, die einzigen Zustände welche gespeichert werden, ist die Datenbankverbindung und die Informationen einer Firma, können eine beliebige Anzahl Benutzer auf das Servlet zugreifen. Da Referenzen auf company-Objekte nur lokal in einer Methode vorhanden sind, können sich mehrere Threads nicht in die quere kommen. Das einzige Problem wäre die Verifizierung der PLZ über einen Webdienst. Dies sollte aus Performance gründen in diesem Fall zwingend mit Hilfe einer lokalen Datenbank vorgenommen werden.
 
 \end{document}
