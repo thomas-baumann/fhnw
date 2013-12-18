@@ -15,7 +15,7 @@ public final class Utility {
 			} else if (rand > 0.6) {
 				next = (char) ('a' + (int) (Math.random() * 26));
 			} else {
-				next = (char) ('0' + (int) (Math.random() * 9));
+				next = (char) ('0' + (int) (Math.random() * 10));
 			}
 			build.append(next);
 		}
